@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#120a1c">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex">
+<title>Concours de costumes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Pirata+One&display=swap" rel="stylesheet">
+<style>
+/* Layout : une colonne (max 720px), bandeau « coups de cœur » collant sous un en-tête court,
+   galerie en carrousel horizontal de pages 2x3 (3x2 à partir de 700px). Thème sombre unique. */
+:root{
+  --bg:#120a1c; --bg-2:#1a0f29; --surface:#231435; --surface-2:#2d1b47;
+  --fg:#f6eefc; --muted:#b9a8d4; --line:rgba(195,164,255,.18);
+  --orange:#ff7a1a; --orange-2:#ffb15c; --violet:#8f5bff; --violet-2:#c3a4ff;
+  --danger:#ff4d6d; --ok:#3ddc97;
+  --font-display:'Pirata One','Georgia',serif;
+  --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.4);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.45;min-height:100vh;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(60% 40% at 0% 0%, rgba(143,91,255,.28), transparent 70%),
+    radial-gradient(50% 35% at 100% 100%, rgba(255,122,26,.22), transparent 70%),
+    var(--bg);
+}
+img{max-width:100%;display:block}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit}
+p{margin:0}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+:focus-visible{outline:2px solid var(--orange-2);outline-offset:2px}
+
+/* En-tête */
+.hero{padding-block:26px 18px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:700}
+.hero h1{font-family:var(--font-display);font-weight:400;font-size:clamp(40px,11vw,60px);line-height:1;margin:0 0 10px;color:var(--orange-2);text-wrap:balance;letter-spacing:.01em}
+.prize{margin:0 0 16px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.mine-info{color:var(--muted);font-size:14px}
+
+/* Boutons */
+.btn{appearance:none;border:0;border-radius:999px;padding:12px 20px;font-weight:800;font-size:15px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;line-height:1.1;transition:transform .15s ease,opacity .15s ease,background .15s ease;-webkit-tap-highlight-color:transparent}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn-primary{background:linear-gradient(135deg,var(--orange),var(--orange-2));color:#1a0b06}
+.btn-secondary{background:transparent;color:var(--violet-2);border:1.5px solid var(--violet)}
+.btn-ghost{background:rgba(255,255,255,.07);color:var(--fg)}
+.btn-danger{background:transparent;border:1.5px solid var(--danger);color:#ffb3c0}
+.btn-danger.armed{background:var(--danger);color:#fff}
+.btn-secondary.armed{background:var(--violet);color:#fff}
+.btn-sm{padding:8px 12px;font-size:13px}
+
+/* Gagnant */
+.gagnant{background:linear-gradient(135deg,rgba(255,122,26,.18),rgba(143,91,255,.18));border:1px solid rgba(255,177,92,.45);border-radius:18px;padding:18px 16px;margin:0 0 14px}
+.gagnant h2{font-family:var(--font-display);font-weight:400;font-size:34px;margin:0 0 12px;color:var(--orange-2);line-height:1.05}
+.gagnant-list{display:grid;gap:12px}
+.gagnant-item{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center}
+.gagnant-item img{width:96px;aspect-ratio:3/4;object-fit:cover;border-radius:12px;border:2px solid var(--orange-2)}
+.gagnant-item b{display:block;font-size:20px;line-height:1.2}
+.gagnant-item span{display:block;color:var(--muted);font-size:14px;margin-top:2px}
+.cocktail{margin:14px 0 0;font-weight:700}
+
+/* Comment ça fonctionne */
+.aide{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:0 16px;margin:0 0 14px}
+.aide summary{cursor:pointer;list-style:none;padding:14px 0;font-weight:800;display:flex;justify-content:space-between;align-items:center;color:var(--violet-2);-webkit-tap-highlight-color:transparent}
+.aide summary::-webkit-details-marker{display:none}
+.aide summary::after{content:"+";font-size:24px;line-height:1;color:var(--muted);transition:transform .2s}
+.aide[open] summary::after{transform:rotate(45deg)}
+.aide p{margin:0 0 12px}
+.aide p:last-child{padding-bottom:4px}
+
+/* Coups de cœur (collant) */
+.favoris{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(26,15,41,.93);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;margin:0 0 14px;box-shadow:var(--shadow);animation:slideIn .35s ease}
+.favoris-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.favoris h2{font-family:var(--font-display);font-weight:400;font-size:24px;margin:0;color:var(--orange-2)}
+.fav-count{color:var(--muted);font-size:13px;white-space:nowrap}
+.fav-list{display:flex;gap:14px;overflow-x:auto;padding:10px 6px 6px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.fav-list::-webkit-scrollbar{display:none}
+.fav{position:relative;flex:0 0 auto;width:72px}
+.fav-pick{display:block;width:72px;background:none;border:0;padding:0;cursor:pointer;text-align:center;position:relative;-webkit-tap-highlight-color:transparent}
+.fav-pick img{width:72px;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:3px solid transparent;transition:border-color .15s,transform .15s}
+.fav.selected .fav-pick img{border-color:var(--orange);transform:scale(1.03)}
+.fav-nom{display:block;font-size:11px;line-height:1.2;margin-top:5px;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fav.selected .fav-nom{color:var(--orange-2);font-weight:800}
+.fav-check{position:absolute;left:4px;top:4px;background:var(--orange);color:#1a0b06;font-size:10px;font-weight:800;border-radius:999px;padding:2px 6px;display:none}
+.fav.selected .fav-check{display:block}
+.fav-x{position:absolute;right:-7px;top:-7px;width:24px;height:24px;border-radius:50%;border:0;background:var(--surface-2);color:var(--fg);font-size:16px;line-height:1;display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.45);padding:0}
+.vote-form{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-top:6px}
+.vote-form .hint{grid-column:1/-1;color:var(--muted);font-size:13px}
+.field{display:grid;gap:6px}
+.field label,.field .lbl{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:12px 14px;font:inherit;font-size:16px;min-width:0}
+.input:focus{border-color:var(--violet);outline:none;box-shadow:0 0 0 3px rgba(143,91,255,.25)}
+.vote-done{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:center;margin-top:8px}
+.vote-done img{width:64px;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:2px solid var(--ok)}
+.vote-done b{display:block;font-size:16px;line-height:1.25}
+.vote-done span{color:var(--muted);font-size:13px}
+.msg{font-size:13px;color:var(--muted)}
+.err{color:#ffb3c0}
+@media (max-width:440px){.vote-form{grid-template-columns:1fr}.vote-form .btn{width:100%}}
+
+/* Galerie */
+.galerie-head{display:flex;justify-content:space-between;align-items:baseline;margin:6px 0 10px}
+.galerie h2{font-family:var(--font-display);font-weight:400;font-size:28px;margin:0}
+.page-info{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.carousel-wrap{position:relative}
+.carousel{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;outline-offset:-2px;
+  margin:0 calc(-1 * max(16px,env(safe-area-inset-right,0px))) 0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:4px 0 24px}
+.carousel::-webkit-scrollbar{display:none}
+.page{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start;
+  padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+@media (min-width:700px){.page{grid-template-columns:repeat(3,1fr)}}
+.card{position:relative;aspect-ratio:3/4;perspective:1000px;cursor:pointer;-webkit-tap-highlight-color:transparent;max-width:100%}
+.card-inner{position:absolute;inset:0;transition:transform .55s cubic-bezier(.2,.7,.2,1);transform-style:preserve-3d}
+.card.flipped .card-inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:var(--radius);overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--surface);box-shadow:0 8px 18px rgba(0,0,0,.4)}
+.face.front img{width:100%;height:100%;object-fit:cover}
+.caption{position:absolute;left:0;right:0;bottom:0;padding:36px 10px 10px;background:linear-gradient(to top,rgba(18,10,28,.96),rgba(18,10,28,.55) 55%,transparent)}
+.caption .nom{font-weight:800;font-size:15px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.6);overflow-wrap:anywhere}
+.badge-duo{position:absolute;left:8px;top:8px;background:var(--violet);color:#fff;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.heart{position:absolute;right:8px;top:8px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(18,10,28,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+.heart svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linejoin:round;transition:fill .15s,stroke .15s}
+.heart.liked svg{fill:var(--orange);stroke:var(--orange);animation:pop .35s ease}
+.mine-tag{position:absolute;right:8px;top:8px;background:rgba(18,10,28,.75);color:var(--violet-2);font-size:11px;font-weight:800;padding:6px 9px;border-radius:999px;border:1px solid var(--violet)}
+.face.back{transform:rotateY(180deg);background:linear-gradient(160deg,var(--surface-2),var(--surface));border:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:14px}
+.back .eyebrow{margin-bottom:8px}
+.porteurs{margin:0;font-size:17px;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
+.porteurs small{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:6px 0}
+.back-hint{position:absolute;bottom:10px;left:0;right:0;font-size:11px;color:var(--muted)}
+.card.appear{animation:appear .4s ease}
+.dots{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:12px 0 4px}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(195,164,255,.3);border:0;padding:0;cursor:pointer;transition:transform .15s,background .15s}
+.dot.active{background:var(--orange);transform:scale(1.35)}
+.arrow{display:none;position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(26,15,41,.92);color:var(--fg);font-size:28px;line-height:1;cursor:pointer;z-index:5;align-items:center;justify-content:center;padding:0 0 3px}
+.arrow.prev{left:4px}.arrow.next{right:4px}
+.arrow:disabled{opacity:.3;cursor:default}
+@media (hover:hover) and (pointer:fine){.arrow{display:flex}}
+@media (hover:hover) and (pointer:fine) and (min-width:840px){.arrow.prev{left:-54px}.arrow.next{right:-54px}}
+.empty{text-align:center;color:var(--muted);padding:40px 16px;border:1px dashed var(--line);border-radius:var(--radius);margin:0}
+
+/* Pied de page */
+footer{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:28px 0 24px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);margin-top:24px;font-variant-numeric:tabular-nums}
+footer a{color:var(--muted);text-decoration:none;opacity:.6;font-size:12px}
+footer a:hover{opacity:1}
+
+/* Boîtes de dialogue */
+dialog{border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--fg);padding:0;width:min(560px,calc(100% - 24px));max-height:92vh;max-height:92dvh;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+dialog::backdrop{background:rgba(8,4,14,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.dlg-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 0}
+dialog h2{font-family:var(--font-display);font-weight:400;font-size:28px;margin:0;color:var(--orange-2)}
+.dlg-body{padding:12px 18px 18px;display:grid;gap:14px}
+.close-x{width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.08);font-size:20px;cursor:pointer;display:grid;place-items:center;padding:0}
+@media (max-width:560px){
+  dialog{width:100%;max-width:100%;margin:auto 0 0;border-radius:18px 18px 0 0;border-bottom:0}
+  .dlg-body{padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg label{position:relative;display:grid;gap:4px;padding:14px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg-2);cursor:pointer;text-align:center}
+.seg input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.seg label.checked,.seg label:has(input:checked){border-color:var(--orange);background:rgba(255,122,26,.12)}
+.seg b{font-size:15px}
+.seg span{font-size:12px;color:var(--muted)}
+.dlg-fields{display:grid;gap:14px}
+.photo-zone{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:start}
+.photo-preview{width:120px;aspect-ratio:3/4;border-radius:12px;background:var(--bg-2);border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:12px;text-align:center;overflow:hidden;padding:8px}
+.photo-preview.filled{padding:0;border-style:solid}
+.photo-preview img{width:100%;height:100%;object-fit:cover}
+.photo-actions{display:grid;gap:10px;min-width:0}
+.photo-actions .btn{width:100%}
+.photo-status{font-size:12px;color:var(--muted)}
+
+/* Administration */
+.admin-login{display:grid;gap:12px}
+.admin-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:transparent;border-radius:999px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted)}
+.tab.active{background:var(--violet);border-color:var(--violet);color:#fff}
+.admin-list{display:grid}
+.row{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);min-width:0}
+.row > div{min-width:0}
+.row img{width:44px;aspect-ratio:3/4;object-fit:cover;border-radius:8px}
+.row b{display:block;font-size:14px;line-height:1.25;overflow-wrap:anywhere}
+.row span{display:block;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.row .count{font-variant-numeric:tabular-nums;font-weight:800;font-size:18px;color:var(--orange-2);text-align:right;white-space:nowrap}
+.rank{width:44px;height:44px;display:grid;place-items:center;font-weight:800;border-radius:50%;background:var(--bg-2);color:var(--violet-2)}
+.rank.top{background:var(--orange);color:#1a0b06}
+.vrow{grid-template-columns:1fr auto}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--surface-2);color:var(--fg);border:1px solid var(--line);padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);opacity:0;transition:opacity .25s,transform .25s;z-index:100;max-width:calc(100% - 32px);font-weight:700;font-size:14px;pointer-events:none;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@keyframes appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.carousel{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <p class="eyebrow">Halloween · 31 octobre 2026 · Anniversaire d’Amaury et Aya</p>
+    <h1>Concours de costumes</h1>
+    <p class="prize">Le gagnant remporte un cocktail offert, à son choix.</p>
+    <div class="hero-actions">
+      <button id="btnInscription" class="btn btn-primary" type="button">Ajouter mon costume</button>
+      <p id="maFicheInfo" class="mine-info" hidden></p>
+    </div>
+  </header>
+
+  <section id="gagnant" class="gagnant" hidden aria-live="polite">
+    <p class="eyebrow">Les votes sont clos</p>
+    <h2 id="gagnantTitre">Le costume gagnant</h2>
+    <div id="gagnantList" class="gagnant-list"></div>
+    <p id="gagnantCocktail" class="cocktail"></p>
+  </section>
+
+  <details id="aide" class="aide" open>
+    <summary>Comment ça fonctionne</summary>
+    <p>Les invités parcourent la grille et touchent le petit cœur sur les costumes qu’ils aiment. Ils peuvent en sélectionner plusieurs.</p>
+    <p>Une section « Tes coups de cœur » apparaît en haut de la page et conserve leurs sélections.</p>
+    <p>Ils choisissent leur costume préféré parmi cette sélection, puis valident leur vote.</p>
+  </details>
+
+  <section id="favoris" class="favoris" hidden aria-live="polite">
+    <div class="favoris-head">
+      <h2>Tes coups de cœur</h2>
+      <span id="favCount" class="fav-count"></span>
+    </div>
+    <div id="favList" class="fav-list"></div>
+    <div id="voteForm" class="vote-form">
+      <p class="hint" id="voteHint">Touche ton costume préféré dans la sélection, puis valide.</p>
+      <div class="field">
+        <label for="votantNom">Ton prénom</label>
+        <input id="votantNom" class="input" autocomplete="given-name" autocapitalize="words" enterkeyhint="done" maxlength="60">
+      </div>
+      <button id="btnVoter" class="btn btn-primary" type="button" disabled>Valider mon vote</button>
+    </div>
+    <p id="voteClos" class="msg" hidden>Les votes sont clos.</p>
+    <div id="voteDone" class="vote-done" hidden>
+      <img id="voteDoneImg" alt="">
+      <div>
+        <b id="voteDoneNom"></b>
+        <span>Vote enregistré. Merci ! Tu peux continuer à parcourir la galerie.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="galerie" aria-label="Galerie des costumes">
+    <div class="galerie-head">
+      <h2>Les costumes</h2>
+      <span id="pageInfo" class="page-info"></span>
+    </div>
+    <p id="galerieEtat" class="empty">Connexion à la galerie…</p>
+    <div id="carouselWrap" class="carousel-wrap" hidden>
+      <button id="prev" class="arrow prev" type="button" aria-label="Page précédente">‹</button>
+      <div id="carousel" class="carousel" tabindex="0" aria-label="Costumes, faire défiler horizontalement"></div>
+      <button id="next" class="arrow next" type="button" aria-label="Page suivante">›</button>
+    </div>
+    <div id="dots" class="dots" aria-label="Pages"></div>
+  </section>
+
+  <footer>
+    <span id="stats">0 fiche · 0 vote</span>
+    <a href="#" id="adminLink">Administration</a>
+  </footer>
+</div>
+
+<dialog id="dlgInscription" aria-labelledby="dlgInscriptionTitre">
+  <div class="dlg-head">
+    <h2 id="dlgInscriptionTitre">Mon costume</h2>
+    <button class="close-x" type="button" data-close aria-label="Fermer">×</button>
+  </div>
+  <form id="formInscription" class="dlg-body" novalidate>
+    <div class="seg" role="radiogroup" aria-label="Solo ou duo">
+      <label id="segSolo"><input type="radio" name="type" value="solo"><b>Je participe seul</b><span>Une personne, un costume</span></label>
+      <label id="segDuo"><input type="radio" name="type" value="duo"><b>Nous participons en duo</b><span>Deux personnes, une seule fiche</span></label>
+    </div>
+    <div id="champs" class="dlg-fields" hidden>
+      <div class="field">
+        <label for="p1" id="lblP1">Prénom et nom</label>
+        <input id="p1" class="input" autocapitalize="words" autocomplete="name" maxlength="80">
+      </div>
+      <div class="field" id="fieldP2" hidden>
+        <label for="p2">Prénom et nom du second participant</label>
+        <input id="p2" class="input" autocapitalize="words" maxlength="80">
+      </div>
+      <div class="field">
+        <label for="personnage" id="lblPersonnage">Nom du personnage ou du costume</label>
+        <input id="personnage" class="input" autocapitalize="sentences" maxlength="80">
+      </div>
+      <div class="field">
+        <span class="lbl" id="lblPhoto">Photo du costume</span>
+        <div class="photo-zone">
+          <div class="photo-preview" id="photoPreview">Format portrait recommandé</div>
+          <div class="photo-actions">
+            <button type="button" class="btn btn-secondary" id="btnCamera">Prendre une photo</button>
+            <button type="button" class="btn btn-ghost" id="btnGalerie">Choisir dans la galerie</button>
+            <p class="photo-status" id="photoStatus">Aucune photo pour l’instant.</p>
+          </div>
+        </div>
+        <input type="file" id="fileCamera" accept="image/*" capture="environment" hidden>
+        <input type="file" id="fileGalerie" accept="image/*" hidden>
+      </div>
+      <p id="formErr" class="msg err" hidden></p>
+      <button type="submit" class="btn btn-primary" id="btnEnregistrer">Enregistrer ma fiche</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgAdmin" aria-labelledby="dlgAdminTitre">
+  <div class="dlg-head">
+    <h2 id="dlgAdminTitre">Administration</h2>
+    <button class="close-x" type="button" data-close aria-label="Fermer">×</button>
+  </div>
+  <div class="dlg-body">
+    <form id="adminLogin" class="admin-login">
+      <div class="field">
+        <label for="adminPw">Mot de passe</label>
+        <input id="adminPw" class="input" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+      <p id="adminErr" class="msg err" hidden>Mot de passe incorrect.</p>
+      <button type="submit" class="btn btn-primary">Entrer</button>
+    </form>
+    <div id="adminPanel" class="dlg-fields" hidden>
+      <p id="adminStats" class="msg"></p>
+      <div class="admin-bar">
+        <button id="btnCloturer" class="btn btn-secondary btn-sm" type="button">Clôturer les votes</button>
+        <button id="btnReset" class="btn btn-danger btn-sm" type="button">Tout réinitialiser</button>
+      </div>
+      <div class="tabs" role="tablist">
+        <button class="tab active" type="button" data-tab="classement">Classement</button>
+        <button class="tab" type="button" data-tab="fiches">Fiches</button>
+        <button class="tab" type="button" data-tab="votes">Votes</button>
+      </div>
+      <div id="adminContent" class="admin-list"></div>
+    </div>
+  </div>
+</dialog>
+
+<div id="toast" class="toast" role="status"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getFirestore, collection, doc, onSnapshot, setDoc, deleteDoc, getDocs, writeBatch, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDvdPrcb8jy6grqmbzf6oIn8J915Ds6jtI",
+  authDomain: "halloween-party-votes.firebaseapp.com",
+  projectId: "halloween-party-votes",
+  storageBucket: "halloween-party-votes.firebasestorage.app",
+  messagingSenderId: "686424676905",
+  appId: "1:686424676905:web:132e32dea76764c9dc9a38"
+};
+const ADMIN_HASH = "a0d0c660c3bfa6a17976c248d998590e0ade873345cab0c65401829c452aa363";
+const PAGE_SIZE = 6;
+const MAX_FICHES = 55;
+const MAX_PHOTO_BYTES = 230 * 1024;
+
+const $ = (id) => document.getElementById(id);
+const LS = {
+  get(k){ try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v){ try { localStorage.setItem(k, v); } catch {} },
+  del(k){ try { localStorage.removeItem(k); } catch {} }
+};
+const SS = {
+  get(k){ try { return sessionStorage.getItem(k); } catch { return null; } },
+  set(k, v){ try { sessionStorage.setItem(k, v); } catch {} }
+};
+function parseJSON(s, fallback){ try { const v = JSON.parse(s); return v == null ? fallback : v; } catch { return fallback; } }
+function uuid(){ try { return crypto.randomUUID(); } catch { return "d-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10); } }
+function plural(n, s, p){ return `${n} ${n > 1 ? (p || s + "s") : s}`; }
+const fmtTime = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+function when(d){
+  const t = d.createdAt && typeof d.createdAt.toDate === "function" ? d.createdAt.toDate() : (d.createdAtMs ? new Date(d.createdAtMs) : null);
+  return t ? fmtTime.format(t) : "…";
+}
+function porteursText(f){ return f.type === "duo" ? `${f.p1 || ""} et ${f.p2 || ""}` : (f.p1 || ""); }
+
+// ---------- État ----------
+const state = {
+  deviceId: LS.get("hw_device") || (() => { const id = uuid(); LS.set("hw_device", id); return id; })(),
+  mesFiches: parseJSON(LS.get("hw_mesFiches"), []),
+  favoris: parseJSON(LS.get("hw_favoris"), []),
+  prefere: LS.get("hw_prefere") || null,
+  fiches: [], fichesById: new Map(),
+  votes: [],
+  etat: { clos: false, gagnants: [] },
+  monVote: null,
+  flipped: new Set(),
+  page: 0,
+  loaded: { fiches: false, votes: false, etat: false, first: false },
+  adminTab: "classement"
+};
+if (!Array.isArray(state.mesFiches)) state.mesFiches = [];
+if (!Array.isArray(state.favoris)) state.favoris = [];
+function persistFav(){ LS.set("hw_favoris", JSON.stringify(state.favoris)); if (state.prefere) LS.set("hw_prefere", state.prefere); else LS.del("hw_prefere"); }
+
+// ---------- Éléments ----------
+const galerieEtat = $("galerieEtat"), carouselWrap = $("carouselWrap"), carousel = $("carousel"), dots = $("dots"), pageInfo = $("pageInfo");
+const prevBtn = $("prev"), nextBtn = $("next");
+const favSection = $("favoris"), favList = $("favList"), favCount = $("favCount"), voteForm = $("voteForm"), voteHint = $("voteHint"), votantNom = $("votantNom"), btnVoter = $("btnVoter"), voteClos = $("voteClos"), voteDone = $("voteDone"), voteDoneImg = $("voteDoneImg"), voteDoneNom = $("voteDoneNom");
+const gagnant = $("gagnant"), gagnantTitre = $("gagnantTitre"), gagnantList = $("gagnantList"), gagnantCocktail = $("gagnantCocktail");
+const maFicheInfo = $("maFicheInfo"), btnInscription = $("btnInscription"), stats = $("stats");
+const dlgInscription = $("dlgInscription"), formInscription = $("formInscription"), champs = $("champs"), fieldP2 = $("fieldP2"), lblP1 = $("lblP1"), lblPersonnage = $("lblPersonnage"), lblPhoto = $("lblPhoto"), photoPreview = $("photoPreview"), photoStatus = $("photoStatus"), formErr = $("formErr"), btnEnregistrer = $("btnEnregistrer");
+const dlgAdmin = $("dlgAdmin"), adminLogin = $("adminLogin"), adminPanel = $("adminPanel"), adminStats = $("adminStats"), adminContent = $("adminContent"), btnCloturer = $("btnCloturer"), btnReset = $("btnReset"), adminErr = $("adminErr"), adminPw = $("adminPw");
+const toastEl = $("toast");
+
+let toastTimer = 0;
+function toast(msg){ toastEl.textContent = msg; toastEl.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3200); }
+
+function dbErrorText(err){
+  const code = (err && err.code) || "";
+  if (code.includes("permission-denied")) return "La base refuse l’accès. Les règles Firestore ont peut-être expiré.";
+  if (code.includes("unavailable")) return "Connexion impossible pour l’instant. Vérifie le réseau et réessaie.";
+  if (code.includes("resource-exhausted")) return "Quota de la base dépassé. Réessaie plus tard.";
+  if (code.includes("invalid-argument")) return "Donnée refusée par la base (photo trop lourde ?).";
+  return (err && err.message) || "Erreur inattendue.";
+}
+function withTimeout(promise, ms){
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(Object.assign(new Error("Délai dépassé"), { code: "timeout" })), ms);
+    promise.then(v => { clearTimeout(t); resolve(v); }, e => { clearTimeout(t); reject(e); });
+  });
+}
+
+// ---------- Firebase ----------
+if (!firebaseConfig || !firebaseConfig.projectId) {
+  galerieEtat.textContent = "Configuration Firebase manquante.";
+  throw new Error("Configuration Firebase manquante");
+}
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const loadTimer = setTimeout(() => {
+  if (!state.loaded.fiches) galerieEtat.textContent = "La galerie met du temps à se charger. Vérifie ta connexion.";
+}, 10000);
+
+onSnapshot(query(collection(db, "fiches"), orderBy("createdAtMs", "asc")), snap => {
+  state.fiches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  state.fichesById = new Map(state.fiches.map(f => [f.id, f]));
+  state.loaded.fiches = true;
+  clearTimeout(loadTimer);
+  const mesAvant = state.mesFiches.length;
+  state.mesFiches = state.mesFiches.filter(id => state.fichesById.has(id));
+  if (state.mesFiches.length !== mesAvant) LS.set("hw_mesFiches", JSON.stringify(state.mesFiches));
+  const favAvant = state.favoris.length;
+  state.favoris = state.favoris.filter(id => state.fichesById.has(id));
+  if (state.prefere && !state.fichesById.has(state.prefere)) state.prefere = null;
+  if (favAvant !== state.favoris.length) persistFav();
+  renderAll();
+  state.loaded.first = true;
+}, err => { galerieEtat.hidden = false; galerieEtat.textContent = dbErrorText(err); });
+
+onSnapshot(collection(db, "votes"), snap => {
+  state.votes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  state.loaded.votes = true;
+  state.monVote = state.votes.find(v => v.id === state.deviceId) || null;
+  renderAll();
+}, err => { console.error(err); });
+
+onSnapshot(doc(db, "concours", "etat"), snap => {
+  const d = snap.exists() ? snap.data() : {};
+  state.etat = { clos: !!d.clos, gagnants: Array.isArray(d.gagnants) ? d.gagnants : [], closedAtMs: d.closedAtMs || null };
+  state.loaded.etat = true;
+  renderAll();
+}, err => { console.error(err); });
+
+// ---------- Rendu ----------
+function renderAll(){ renderHero(); renderGagnant(); renderGalerie(); renderFavoris(); renderStats(); renderAdmin(); }
+
+function renderHero(){
+  const mine = state.mesFiches.map(id => state.fichesById.get(id)).filter(Boolean);
+  if (mine.length) {
+    maFicheInfo.hidden = false;
+    maFicheInfo.textContent = (mine.length === 1 ? "Ta fiche : " : "Tes fiches : ") + mine.map(f => f.personnage).join(", ");
+  } else {
+    maFicheInfo.hidden = true;
+  }
+  const complet = state.loaded.fiches && state.fiches.length >= MAX_FICHES;
+  btnInscription.disabled = state.etat.clos || complet;
+  btnInscription.textContent = state.etat.clos ? "Inscriptions closes" : (complet ? `Complet (${MAX_FICHES} fiches)` : (mine.length ? "Ajouter un autre costume" : "Ajouter mon costume"));
+}
+
+function voteCounts(){
+  const counts = new Map();
+  for (const v of state.votes) counts.set(v.ficheId, (counts.get(v.ficheId) || 0) + 1);
+  return counts;
+}
+
+function renderGagnant(){
+  if (!state.etat.clos) { gagnant.hidden = true; return; }
+  gagnant.hidden = false;
+  const gs = state.etat.gagnants.map(g => ({ ...g, f: state.fichesById.get(g.ficheId) })).filter(g => g.f);
+  gagnantTitre.textContent = gs.length > 1 ? "Les costumes gagnants, ex æquo" : (gs.length === 1 ? "Le costume gagnant" : "Aucun gagnant");
+  gagnantList.replaceChildren(...gs.map(g => {
+    const item = document.createElement("div"); item.className = "gagnant-item";
+    const img = document.createElement("img"); img.src = g.f.photo || ""; img.alt = g.f.personnage || "";
+    const txt = document.createElement("div");
+    const b = document.createElement("b"); b.textContent = g.f.personnage || "";
+    const who = document.createElement("span"); who.textContent = (g.f.type === "duo" ? "Duo : " : "") + porteursText(g.f);
+    const n = document.createElement("span"); n.textContent = plural(g.votes || 0, "vote");
+    txt.append(b, who, n); item.append(img, txt);
+    return item;
+  }));
+  if (gs.length === 0) gagnantCocktail.textContent = "Aucun vote n’a été enregistré.";
+  else if (gs.length === 1) gagnantCocktail.textContent = gs[0].f.type === "duo" ? "Un cocktail offert pour le duo, à votre choix." : "Un cocktail offert, à ton choix.";
+  else gagnantCocktail.textContent = "Un cocktail offert pour chaque fiche gagnante, à leur choix.";
+}
+
+const cardEls = new Map();
+function heartSvg(){
+  return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+}
+function createCard(f){
+  const card = document.createElement("div");
+  card.className = "card"; card.dataset.id = f.id; card.tabIndex = 0; card.setAttribute("role", "button");
+  card.innerHTML =
+    '<div class="card-inner">' +
+      '<div class="face front">' +
+        '<img alt="" decoding="async">' +
+        '<div class="caption"><span class="nom"></span></div>' +
+        '<span class="badge-duo" hidden>Duo</span>' +
+        '<button class="heart" type="button" aria-pressed="false" aria-label="Ajouter aux coups de cœur">' + heartSvg() + '</button>' +
+        '<span class="mine-tag" hidden>Ta fiche</span>' +
+      '</div>' +
+      '<div class="face back">' +
+        '<p class="eyebrow">Porté par</p>' +
+        '<p class="porteurs"></p>' +
+        '<p class="back-hint">Touche pour revenir à la photo</p>' +
+      '</div>' +
+    '</div>';
+  card.addEventListener("click", e => { if (e.target.closest(".heart")) return; toggleFlip(card); });
+  card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleFlip(card); } });
+  card.querySelector(".heart").addEventListener("click", e => { e.stopPropagation(); toggleFavori(f.id); });
+  return card;
+}
+function toggleFlip(card){
+  const id = card.dataset.id;
+  if (state.flipped.has(id)) state.flipped.delete(id); else state.flipped.add(id);
+  card.classList.toggle("flipped", state.flipped.has(id));
+  const f = state.fichesById.get(id);
+  if (f) card.setAttribute("aria-label", state.flipped.has(id) ? `${f.personnage}, porté par ${porteursText(f)}` : `${f.personnage}, toucher pour voir qui le porte`);
+}
+function updateCard(card, f){
+  const img = card.querySelector("img");
+  if (img.getAttribute("src") !== (f.photo || "")) img.src = f.photo || "";
+  img.alt = f.personnage || "";
+  card.querySelector(".nom").textContent = f.personnage || "";
+  card.querySelector(".badge-duo").hidden = f.type !== "duo";
+  const porteurs = card.querySelector(".porteurs");
+  porteurs.replaceChildren();
+  porteurs.append(f.p1 || "");
+  if (f.type === "duo") { const s = document.createElement("small"); s.textContent = "et"; porteurs.append(s, f.p2 || ""); }
+  const mine = state.mesFiches.includes(f.id);
+  const canVote = !mine && !state.monVote && !state.etat.clos;
+  const heart = card.querySelector(".heart"), tag = card.querySelector(".mine-tag");
+  heart.hidden = !canVote; tag.hidden = !mine;
+  const liked = state.favoris.includes(f.id);
+  heart.classList.toggle("liked", liked);
+  heart.setAttribute("aria-pressed", String(liked));
+  heart.setAttribute("aria-label", liked ? "Retirer des coups de cœur" : "Ajouter aux coups de cœur");
+  card.classList.toggle("flipped", state.flipped.has(f.id));
+  if (!card.hasAttribute("aria-label")) card.setAttribute("aria-label", `${f.personnage}, toucher pour voir qui le porte`);
+}
+
+function renderGalerie(){
+  if (!state.loaded.fiches) return;
+  const fiches = state.fiches;
+  if (fiches.length === 0) {
+    galerieEtat.textContent = "Aucun costume pour l’instant. Ajoute le tien avec le bouton en haut de la page.";
+    galerieEtat.hidden = false; carouselWrap.hidden = true; dots.replaceChildren(); pageInfo.textContent = "";
+    for (const [id, el] of cardEls) { el.remove(); cardEls.delete(id); }
+    return;
+  }
+  galerieEtat.hidden = true; carouselWrap.hidden = false;
+  for (const [id, el] of cardEls) if (!state.fichesById.has(id)) { el.remove(); cardEls.delete(id); state.flipped.delete(id); }
+  const pages = [];
+  fiches.forEach((f, i) => {
+    let card = cardEls.get(f.id);
+    if (!card) { card = createCard(f); cardEls.set(f.id, card); if (state.loaded.first) card.classList.add("appear"); }
+    updateCard(card, f);
+    const p = Math.floor(i / PAGE_SIZE);
+    if (!pages[p]) { pages[p] = document.createElement("div"); pages[p].className = "page"; }
+    pages[p].appendChild(card);
+  });
+  carousel.style.scrollBehavior = "auto";
+  carousel.replaceChildren(...pages);
+  state.page = Math.max(0, Math.min(state.page, pages.length - 1));
+  carousel.scrollLeft = state.page * carousel.clientWidth;
+  requestAnimationFrame(() => { carousel.style.scrollBehavior = ""; });
+  renderDots(pages.length);
+}
+function renderDots(n){
+  dots.replaceChildren();
+  for (let i = 0; i < n; i++) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "dot" + (i === state.page ? " active" : "");
+    b.setAttribute("aria-label", `Page ${i + 1}`);
+    b.addEventListener("click", () => goTo(i));
+    dots.appendChild(b);
+  }
+  updateDots();
+}
+function updateDots(){
+  const n = dots.children.length;
+  [...dots.children].forEach((d, i) => d.classList.toggle("active", i === state.page));
+  pageInfo.textContent = n > 1 ? `Page ${state.page + 1} / ${n}` : "";
+  prevBtn.disabled = state.page <= 0;
+  nextBtn.disabled = state.page >= n - 1;
+}
+function goTo(i){ carousel.scrollTo({ left: i * carousel.clientWidth, behavior: "smooth" }); }
+let scrollRaf = 0;
+carousel.addEventListener("scroll", () => {
+  if (scrollRaf) return;
+  scrollRaf = requestAnimationFrame(() => {
+    scrollRaf = 0;
+    const w = carousel.clientWidth || 1;
+    const p = Math.round(carousel.scrollLeft / w);
+    if (p !== state.page) { state.page = p; updateDots(); }
+  });
+});
+prevBtn.addEventListener("click", () => goTo(Math.max(0, state.page - 1)));
+nextBtn.addEventListener("click", () => goTo(Math.min(dots.children.length - 1, state.page + 1)));
+carousel.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight") { e.preventDefault(); nextBtn.click(); }
+  if (e.key === "ArrowLeft") { e.preventDefault(); prevBtn.click(); }
+});
+addEventListener("resize", () => { carousel.style.scrollBehavior = "auto"; carousel.scrollLeft = state.page * carousel.clientWidth; requestAnimationFrame(() => { carousel.style.scrollBehavior = ""; }); });
+
+// ---------- Coups de cœur et vote ----------
+function toggleFavori(id){
+  const f = state.fichesById.get(id);
+  if (!f) return;
+  if (state.mesFiches.includes(id)) { toast("Tu ne peux pas voter pour ta propre fiche."); return; }
+  if (state.monVote) { toast("Ton vote est déjà enregistré."); return; }
+  if (state.etat.clos) { toast("Les votes sont clos."); return; }
+  const i = state.favoris.indexOf(id);
+  if (i >= 0) { state.favoris.splice(i, 1); if (state.prefere === id) state.prefere = null; }
+  else state.favoris.push(id);
+  persistFav();
+  const card = cardEls.get(id); if (card) updateCard(card, f);
+  renderFavoris();
+}
+function favItem(f){
+  const wrap = document.createElement("div");
+  wrap.className = "fav" + (state.prefere === f.id ? " selected" : "");
+  const pick = document.createElement("button");
+  pick.type = "button"; pick.className = "fav-pick";
+  pick.setAttribute("aria-pressed", String(state.prefere === f.id));
+  pick.setAttribute("aria-label", `Choisir ${f.personnage} comme préféré`);
+  const img = document.createElement("img"); img.src = f.photo || ""; img.alt = "";
+  const nom = document.createElement("span"); nom.className = "fav-nom"; nom.textContent = f.personnage || "";
+  const chk = document.createElement("span"); chk.className = "fav-check"; chk.textContent = "Préféré";
+  pick.append(img, nom, chk);
+  pick.addEventListener("click", () => { state.prefere = state.prefere === f.id ? null : f.id; persistFav(); renderFavoris(); });
+  const x = document.createElement("button");
+  x.type = "button"; x.className = "fav-x"; x.textContent = "×";
+  x.setAttribute("aria-label", `Retirer ${f.personnage} des coups de cœur`);
+  x.addEventListener("click", () => toggleFavori(f.id));
+  wrap.append(pick, x);
+  return wrap;
+}
+function renderFavoris(){
+  const voted = !!state.monVote && state.loaded.fiches;
+  const favs = state.favoris.map(id => state.fichesById.get(id)).filter(Boolean);
+  const show = favs.length > 0 || voted;
+  favSection.hidden = !show;
+  if (!show) return;
+  if (voted) {
+    favList.hidden = true; voteForm.hidden = true; voteClos.hidden = true; voteDone.hidden = false;
+    const f = state.fichesById.get(state.monVote.ficheId);
+    voteDoneImg.hidden = !f;
+    voteDoneImg.src = f ? (f.photo || "") : "";
+    voteDoneNom.textContent = f ? `Ton vote : ${f.personnage}` : "Ton vote : costume retiré du concours";
+    favCount.textContent = "";
+    return;
+  }
+  voteDone.hidden = true; favList.hidden = false;
+  favCount.textContent = plural(favs.length, "coup de cœur", "coups de cœur");
+  favList.replaceChildren(...favs.map(favItem));
+  if (state.etat.clos) { voteForm.hidden = true; voteClos.hidden = false; }
+  else { voteForm.hidden = false; voteClos.hidden = true; updateVoteBtn(); }
+}
+function updateVoteBtn(){
+  const f = state.prefere ? state.fichesById.get(state.prefere) : null;
+  btnVoter.disabled = !(f && votantNom.value.trim().length > 0);
+  voteHint.textContent = f ? `Ton choix : ${f.personnage}. Indique ton prénom et valide.` : "Touche ton costume préféré dans la sélection, puis valide.";
+}
+votantNom.addEventListener("input", updateVoteBtn);
+if (LS.get("hw_votant")) votantNom.value = LS.get("hw_votant");
+
+let voting = false;
+async function voter(){
+  if (voting || !state.prefere || state.monVote || state.etat.clos) return;
+  const f = state.fichesById.get(state.prefere); if (!f) return;
+  const nom = votantNom.value.trim();
+  if (!nom) { votantNom.focus(); return; }
+  if (state.mesFiches.includes(f.id)) { toast("Tu ne peux pas voter pour ta propre fiche."); return; }
+  voting = true; btnVoter.disabled = true; btnVoter.textContent = "Enregistrement…";
+  try {
+    await withTimeout(setDoc(doc(db, "votes", state.deviceId), {
+      ficheId: f.id, votant: nom,
+      votantFicheId: state.mesFiches[0] || null,
+      deviceId: state.deviceId,
+      createdAtMs: Date.now(), createdAt: serverTimestamp()
+    }), 25000);
+    LS.set("hw_votant", nom);
+    state.favoris = []; state.prefere = null; persistFav();
+    toast(`Vote enregistré pour ${f.personnage}. Merci !`);
+  } catch (err) {
+    toast(err && err.code === "timeout" ? "Réseau lent. Le vote part dès que la connexion revient." : dbErrorText(err));
+  } finally {
+    voting = false; btnVoter.textContent = "Valider mon vote"; updateVoteBtn();
+  }
+}
+btnVoter.addEventListener("click", voter);
+votantNom.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); if (!btnVoter.disabled) voter(); } });
+
+function renderStats(){ stats.textContent = `${plural(state.fiches.length, "fiche")} · ${plural(state.votes.length, "vote")}`; }
+
+// ---------- Boîtes de dialogue ----------
+for (const dlg of [dlgInscription, dlgAdmin]) {
+  dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+  dlg.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => dlg.close()));
+}
+
+// Comment ça fonctionne : état replié mémorisé
+const aide = $("aide");
+if (LS.get("hw_aide") === "ferme") aide.open = false;
+aide.addEventListener("toggle", () => LS.set("hw_aide", aide.open ? "ouvert" : "ferme"));
+
+// ---------- Inscription ----------
+let photoDataUrl = null, compressing = false, pendingRef = null;
+btnInscription.addEventListener("click", () => { if (!state.etat.clos && state.fiches.length < MAX_FICHES) dlgInscription.showModal(); });
+
+const typeRadios = formInscription.querySelectorAll('input[name="type"]');
+typeRadios.forEach(r => r.addEventListener("change", () => {
+  const duo = r.value === "duo";
+  $("segSolo").classList.toggle("checked", !duo);
+  $("segDuo").classList.toggle("checked", duo);
+  champs.hidden = false;
+  fieldP2.hidden = !duo;
+  lblP1.textContent = duo ? "Prénom et nom du premier participant" : "Prénom et nom";
+  lblPersonnage.textContent = duo ? "Nom du duo ou des personnages" : "Nom du personnage ou du costume";
+  $("personnage").placeholder = duo ? "Par exemple : Gomez et Morticia" : "";
+  lblPhoto.textContent = duo ? "Photo commune du duo" : "Photo du costume";
+  formErr.hidden = true;
+}));
+$("btnCamera").addEventListener("click", () => $("fileCamera").click());
+$("btnGalerie").addEventListener("click", () => $("fileGalerie").click());
+$("fileCamera").addEventListener("change", e => handleFile(e.target.files && e.target.files[0]));
+$("fileGalerie").addEventListener("change", e => handleFile(e.target.files && e.target.files[0]));
+
+function loadImg(url){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Image illisible"));
+    img.src = url;
+  });
+}
+function encode(img, maxEdge, q){
+  const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+  const s = Math.min(1, maxEdge / Math.max(w, h));
+  const cw = Math.max(1, Math.round(w * s)), ch = Math.max(1, Math.round(h * s));
+  const c = document.createElement("canvas"); c.width = cw; c.height = ch;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#000"; ctx.fillRect(0, 0, cw, ch);
+  ctx.drawImage(img, 0, 0, cw, ch);
+  return c.toDataURL("image/jpeg", q);
+}
+async function compressImage(file){
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await loadImg(url);
+    if (img.decode) { try { await img.decode(); } catch {} }
+    const limit = MAX_PHOTO_BYTES * 1.37;
+    let maxEdge = 900, q = 0.76;
+    let out = encode(img, maxEdge, q);
+    while (out.length > limit && q > 0.5) { q -= 0.07; out = encode(img, maxEdge, q); }
+    while (out.length > limit && maxEdge > 480) { maxEdge -= 120; out = encode(img, maxEdge, q); }
+    return out;
+  } finally { URL.revokeObjectURL(url); }
+}
+async function handleFile(file){
+  if (!file) return;
+  compressing = true; btnEnregistrer.disabled = true; formErr.hidden = true;
+  photoStatus.textContent = "Préparation de la photo…";
+  try {
+    photoDataUrl = await compressImage(file);
+    const img = document.createElement("img"); img.src = photoDataUrl; img.alt = "Aperçu de la photo";
+    photoPreview.replaceChildren(img); photoPreview.classList.add("filled");
+    photoStatus.textContent = `Photo prête (${Math.round(photoDataUrl.length * 0.75 / 1024)} ko). Tu peux la remplacer.`;
+  } catch (err) {
+    photoDataUrl = null;
+    photoPreview.replaceChildren("Format portrait recommandé"); photoPreview.classList.remove("filled");
+    photoStatus.textContent = "Impossible de lire cette photo. Essaie une autre image (JPEG ou PNG).";
+  } finally {
+    compressing = false; btnEnregistrer.disabled = false;
+    $("fileCamera").value = ""; $("fileGalerie").value = "";
+  }
+}
+function showErr(msg){ formErr.textContent = msg; formErr.hidden = false; }
+function resetForm(){
+  formInscription.reset();
+  $("segSolo").classList.remove("checked"); $("segDuo").classList.remove("checked");
+  champs.hidden = true; fieldP2.hidden = true;
+  photoDataUrl = null; pendingRef = null;
+  photoPreview.replaceChildren("Format portrait recommandé"); photoPreview.classList.remove("filled");
+  photoStatus.textContent = "Aucune photo pour l’instant."; formErr.hidden = true;
+}
+formInscription.addEventListener("submit", async e => {
+  e.preventDefault(); formErr.hidden = true;
+  const type = new FormData(formInscription).get("type");
+  if (!type) return showErr("Choisis « Je participe seul » ou « Nous participons en duo ».");
+  const duo = type === "duo";
+  const p1 = $("p1").value.trim(), p2 = $("p2").value.trim(), perso = $("personnage").value.trim();
+  if (!p1) return showErr(duo ? "Indique le prénom et le nom du premier participant." : "Indique ton prénom et ton nom.");
+  if (duo && !p2) return showErr("Indique le prénom et le nom du second participant.");
+  if (!perso) return showErr(duo ? "Indique le nom du duo ou des personnages." : "Indique le nom du personnage ou du costume.");
+  if (compressing) return showErr("La photo est encore en préparation, patiente une seconde.");
+  if (!photoDataUrl) return showErr(duo ? "Ajoute une photo commune du duo." : "Ajoute une photo du costume.");
+  if (state.etat.clos) return showErr("Les inscriptions sont closes.");
+  if (state.fiches.length >= MAX_FICHES && !(pendingRef && state.fichesById.has(pendingRef.id))) return showErr(`Le concours est complet : ${MAX_FICHES} fiches au maximum.`);
+  btnEnregistrer.disabled = true; btnEnregistrer.textContent = "Enregistrement…";
+  try {
+    if (!pendingRef) pendingRef = doc(collection(db, "fiches"));
+    const ref = pendingRef;
+    await withTimeout(setDoc(ref, {
+      type, personnage: perso, p1, p2: duo ? p2 : null,
+      photo: photoDataUrl, deviceId: state.deviceId,
+      createdAtMs: Date.now(), createdAt: serverTimestamp()
+    }), 30000);
+    if (!state.mesFiches.includes(ref.id)) { state.mesFiches.push(ref.id); LS.set("hw_mesFiches", JSON.stringify(state.mesFiches)); }
+    if (!votantNom.value.trim()) votantNom.value = p1.split(/\s+/)[0] || "";
+    const i = state.favoris.indexOf(ref.id); if (i >= 0) { state.favoris.splice(i, 1); persistFav(); }
+    dlgInscription.close(); resetForm();
+    toast("Fiche enregistrée. Elle apparaît dans la galerie.");
+  } catch (err) {
+    showErr(err && err.code === "timeout" ? "Réseau lent : la fiche n’a pas encore été confirmée. Réessaie dans un instant." : dbErrorText(err));
+  } finally {
+    btnEnregistrer.disabled = false; btnEnregistrer.textContent = "Enregistrer ma fiche";
+  }
+});
+
+// ---------- Administration ----------
+$("adminLink").addEventListener("click", e => {
+  e.preventDefault();
+  const ok = SS.get("hw_admin") === "1";
+  adminLogin.hidden = ok; adminPanel.hidden = !ok; adminErr.hidden = true;
+  dlgAdmin.showModal();
+  if (ok) renderAdmin(); else setTimeout(() => adminPw.focus(), 50);
+});
+async function sha256(str){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+adminLogin.addEventListener("submit", async e => {
+  e.preventDefault();
+  const pw = adminPw.value.trim().replace(/[‘’‛′`´]/g, "'");
+  if (!(crypto.subtle && crypto.subtle.digest)) { adminErr.textContent = "Ouvre la page en https pour accéder à l’administration."; adminErr.hidden = false; return; }
+  const h = await sha256(pw);
+  if (h === ADMIN_HASH) {
+    SS.set("hw_admin", "1"); adminPw.value = ""; adminErr.hidden = true;
+    adminLogin.hidden = true; adminPanel.hidden = false; renderAdmin();
+  } else {
+    adminErr.textContent = "Mot de passe incorrect."; adminErr.hidden = false;
+  }
+});
+dlgAdmin.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+  state.adminTab = t.dataset.tab;
+  dlgAdmin.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === t));
+  renderAdmin();
+}));
+function armed(btn, label, fn){
+  if (btn.dataset.armed === "1") {
+    btn.dataset.armed = ""; btn.classList.remove("armed"); btn.textContent = btn.dataset.label || btn.textContent;
+    fn(); return;
+  }
+  btn.dataset.label = btn.textContent; btn.dataset.armed = "1"; btn.classList.add("armed"); btn.textContent = label;
+  setTimeout(() => { if (btn.dataset.armed === "1") { btn.dataset.armed = ""; btn.classList.remove("armed"); btn.textContent = btn.dataset.label; } }, 4000);
+}
+btnCloturer.addEventListener("click", () => armed(btnCloturer, state.etat.clos ? "Confirmer la réouverture" : "Confirmer la clôture", toggleClos));
+btnReset.addEventListener("click", () => armed(btnReset, "Confirmer : tout effacer", resetAll));
+
+async function toggleClos(){
+  try {
+    if (state.etat.clos) {
+      await setDoc(doc(db, "concours", "etat"), { clos: false, gagnants: [], updatedAtMs: Date.now() });
+      toast("Votes rouverts.");
+      return;
+    }
+    const counts = voteCounts();
+    let max = 0; for (const n of counts.values()) max = Math.max(max, n);
+    const gagnants = max > 0 ? state.fiches.filter(f => (counts.get(f.id) || 0) === max).map(f => ({ ficheId: f.id, votes: max })) : [];
+    await setDoc(doc(db, "concours", "etat"), { clos: true, gagnants, closedAtMs: Date.now(), closedAt: serverTimestamp() });
+    toast(gagnants.length ? "Votes clos. Le gagnant est affiché à tous les invités." : "Votes clos. Aucun vote enregistré.");
+  } catch (err) { toast(dbErrorText(err)); }
+}
+async function resetAll(){
+  try {
+    const [fs, vs] = await Promise.all([getDocs(collection(db, "fiches")), getDocs(collection(db, "votes"))]);
+    const refs = [...fs.docs, ...vs.docs].map(d => d.ref);
+    for (let i = 0; i < refs.length; i += 400) {
+      const b = writeBatch(db);
+      refs.slice(i, i + 400).forEach(r => b.delete(r));
+      await b.commit();
+    }
+    await setDoc(doc(db, "concours", "etat"), { clos: false, gagnants: [], updatedAtMs: Date.now() });
+    state.favoris = []; state.prefere = null; persistFav();
+    state.mesFiches = []; LS.set("hw_mesFiches", "[]");
+    toast("Tout a été réinitialisé.");
+  } catch (err) { toast(dbErrorText(err)); }
+}
+async function supprimerFiche(id){
+  try {
+    const b = writeBatch(db);
+    b.delete(doc(db, "fiches", id));
+    state.votes.filter(v => v.ficheId === id).forEach(v => b.delete(doc(db, "votes", v.id)));
+    await b.commit();
+    toast("Fiche supprimée, avec les votes qui la concernaient.");
+  } catch (err) { toast(dbErrorText(err)); }
+}
+async function supprimerVote(id){
+  try { await deleteDoc(doc(db, "votes", id)); toast("Vote supprimé."); }
+  catch (err) { toast(dbErrorText(err)); }
+}
+function rowEl(f, leading, trailing, extra){
+  const row = document.createElement("div"); row.className = "row";
+  const txt = document.createElement("div");
+  const b = document.createElement("b"); b.textContent = f.personnage || "";
+  const who = document.createElement("span"); who.textContent = (f.type === "duo" ? "Duo : " : "") + porteursText(f);
+  txt.append(b, who);
+  if (extra) { const s = document.createElement("span"); s.textContent = extra; txt.append(s); }
+  row.append(leading, txt, trailing);
+  return row;
+}
+function thumb(f){ const img = document.createElement("img"); img.src = f.photo || ""; img.alt = ""; return img; }
+function delBtn(label, armLabel, fn){
+  const btn = document.createElement("button"); btn.type = "button"; btn.className = "btn btn-danger btn-sm"; btn.textContent = label;
+  btn.addEventListener("click", () => armed(btn, armLabel, fn));
+  return btn;
+}
+function renderAdmin(){
+  if (!dlgAdmin.open || adminPanel.hidden) return;
+  const counts = voteCounts();
+  adminStats.textContent = `${plural(state.fiches.length, "fiche")} · ${plural(state.votes.length, "vote")} · ` + (state.etat.clos ? "votes clos" : "votes ouverts");
+  if (btnCloturer.dataset.armed !== "1") btnCloturer.textContent = state.etat.clos ? "Rouvrir les votes" : "Clôturer les votes";
+  const c = adminContent; c.replaceChildren();
+  if (state.adminTab === "classement") {
+    const ordered = [...state.fiches].sort((a, b) => (counts.get(b.id) || 0) - (counts.get(a.id) || 0) || (a.createdAtMs || 0) - (b.createdAtMs || 0));
+    if (!ordered.length) { const p = document.createElement("p"); p.className = "msg"; p.textContent = "Aucune fiche."; c.append(p); }
+    let max = 0; for (const n of counts.values()) max = Math.max(max, n);
+    ordered.forEach((f, i) => {
+      const n = counts.get(f.id) || 0;
+      const rank = document.createElement("div"); rank.className = "rank" + (n > 0 && n === max ? " top" : ""); rank.textContent = String(i + 1);
+      const cnt = document.createElement("div"); cnt.className = "count"; cnt.textContent = String(n);
+      c.append(rowEl(f, rank, cnt));
+    });
+  } else if (state.adminTab === "fiches") {
+    if (!state.fiches.length) { const p = document.createElement("p"); p.className = "msg"; p.textContent = "Aucune fiche."; c.append(p); }
+    state.fiches.forEach(f => c.append(rowEl(f, thumb(f), delBtn("Supprimer", "Confirmer", () => supprimerFiche(f.id)), `${f.type === "duo" ? "Duo" : "Solo"} · ${when(f)}`)));
+  } else {
+    const ordered = [...state.votes].sort((a, b) => (a.createdAtMs || 0) - (b.createdAtMs || 0));
+    if (!ordered.length) { const p = document.createElement("p"); p.className = "msg"; p.textContent = "Aucun vote."; c.append(p); }
+    ordered.forEach(v => {
+      const f = state.fichesById.get(v.ficheId);
+      const vf = v.votantFicheId ? state.fichesById.get(v.votantFicheId) : null;
+      const row = document.createElement("div"); row.className = "row vrow";
+      const txt = document.createElement("div");
+      const b = document.createElement("b"); b.textContent = `${v.votant || "Anonyme"} → ${f ? f.personnage : "fiche supprimée"}`;
+      const s = document.createElement("span"); s.textContent = when(v) + (vf ? ` · participant : ${vf.personnage}` : "");
+      txt.append(b, s);
+      row.append(txt, delBtn("Supprimer", "Confirmer", () => supprimerVote(v.id)));
+      c.append(row);
+    });
+  }
+}
+</script>
+</body>
+</html>
