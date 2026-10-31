@@ -665,7 +665,7 @@ function renderGagnant(){
     txt.append(b, who, n); item.append(medal, img, txt);
     return item;
   }));
-  gagnantCocktail.textContent = gs.length === 0 ? "Aucun vote n’a été enregistré." : "Un cocktail offert pour chaque fiche du podium, à son choix. Pour un duo, le cocktail vaut pour le duo.";
+  gagnantCocktail.textContent = gs.length === 0 ? "Aucun vote n’a été enregistré." : "Un cocktail offert à chaque lauréat, à son choix.";
   if (closVu === false && gs.length) hurlementReveal();
   closVu = true;
 }
