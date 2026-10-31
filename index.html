@@ -18,6 +18,7 @@
   --fg:#f6eefc; --muted:#b9a8d4; --line:rgba(195,164,255,.18);
   --orange:#ff7a1a; --orange-2:#ffb15c; --violet:#8f5bff; --violet-2:#c3a4ff;
   --danger:#ff4d6d; --ok:#3ddc97;
+  --or:#f6c453; --argent:#cdd3e0; --bronze:#d2905a;
   --font-display:'Pirata One','Georgia',serif;
   --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.4);
@@ -64,15 +65,44 @@ p{margin:0}
 .btn-secondary.armed{background:var(--violet);color:#fff}
 .btn-sm{padding:8px 12px;font-size:13px}
 
-/* Gagnant */
+/* Podium */
 .gagnant{background:linear-gradient(135deg,rgba(255,122,26,.18),rgba(143,91,255,.18));border:1px solid rgba(255,177,92,.45);border-radius:18px;padding:18px 16px;margin:0 0 14px}
 .gagnant h2{font-family:var(--font-display);font-weight:400;font-size:34px;margin:0 0 12px;color:var(--orange-2);line-height:1.05}
-.gagnant-list{display:grid;gap:12px}
-.gagnant-item{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center}
-.gagnant-item img{width:96px;aspect-ratio:3/4;object-fit:cover;border-radius:12px;border:2px solid var(--orange-2)}
-.gagnant-item b{display:block;font-size:20px;line-height:1.2}
-.gagnant-item span{display:block;color:var(--muted);font-size:14px;margin-top:2px}
+.podium{display:grid;gap:12px}
+.podium-item{display:grid;grid-template-columns:40px 80px 1fr;gap:12px;align-items:center;min-width:0}
+.podium-item > div{min-width:0}
+.medal{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;color:#1a0b06;background:var(--or);box-shadow:0 2px 8px rgba(0,0,0,.4);font-variant-numeric:tabular-nums}
+.r2 .medal{background:var(--argent)}
+.r3 .medal{background:var(--bronze)}
+.podium-item img{width:80px;aspect-ratio:3/4;object-fit:cover;border-radius:12px;border:2px solid var(--or)}
+.podium-item.r2 img{border-color:var(--argent)}
+.podium-item.r3 img{border-color:var(--bronze)}
+.podium-item b{display:block;font-size:19px;line-height:1.2;overflow-wrap:anywhere}
+.podium-item span{display:block;color:var(--muted);font-size:14px;margin-top:2px;overflow-wrap:anywhere}
 .cocktail{margin:14px 0 0;font-weight:700}
+
+/* Décor : toiles, araignée, bouton son */
+.webs{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.web{position:absolute;width:150px;height:150px;color:rgba(230,220,255,.28)}
+.web svg{display:block;width:100%;height:100%;overflow:visible}
+.web.tl{left:0;top:0}
+.web.tr{right:0;top:0;transform:scaleX(-1)}
+.web.bl{left:0;bottom:0;transform:scaleY(-1)}
+.web.br{right:0;bottom:0;transform:scale(-1,-1)}
+@media (min-width:700px){.web{width:230px;height:230px}}
+.thread{position:fixed;top:0;width:1px;height:0;background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.6));z-index:29;pointer-events:none;transition:opacity 1.2s}
+.thread.fade{opacity:0}
+.spider{position:fixed;left:0;top:0;width:34px;height:34px;z-index:30;pointer-events:none;will-change:transform;filter:drop-shadow(0 2px 2px rgba(0,0,0,.7))}
+.spider svg{display:block;width:100%;height:100%;overflow:visible}
+.spider .legs{transform-origin:32px 29px}
+.spider.walking .legs-a{animation:legs .22s ease-in-out infinite}
+.spider.walking .legs-b{animation:legs .22s ease-in-out infinite;animation-delay:-.11s}
+@keyframes legs{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+.son{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:25;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:rgba(26,15,41,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--muted);border-radius:999px;padding:10px 14px 10px 12px;font-weight:800;font-size:13px;cursor:pointer;box-shadow:var(--shadow);-webkit-tap-highlight-color:transparent}
+.son svg{width:18px;height:18px;fill:currentColor;flex:none}
+.son[aria-pressed="true"]{color:#1a0b06;background:linear-gradient(135deg,var(--orange),var(--orange-2));border-color:transparent}
+.son[aria-pressed="true"] svg{animation:moon 3s ease-in-out infinite}
+@keyframes moon{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg)}}
 
 /* Comment ça fonctionne */
 .aide{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:0 16px;margin:0 0 14px}
@@ -153,7 +183,7 @@ p{margin:0}
 .empty{text-align:center;color:var(--muted);padding:40px 16px;border:1px dashed var(--line);border-radius:var(--radius);margin:0}
 
 /* Pied de page */
-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:28px 0 24px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);margin-top:24px;font-variant-numeric:tabular-nums}
+footer{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:28px 0 92px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);margin-top:24px;font-variant-numeric:tabular-nums}
 footer a{color:var(--muted);text-decoration:none;opacity:.6;font-size:12px}
 footer a:hover{opacity:1}
 
@@ -197,9 +227,11 @@ dialog h2{font-family:var(--font-display);font-weight:400;font-size:28px;margin:
 .row span{display:block;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
 .row .count{font-variant-numeric:tabular-nums;font-weight:800;font-size:18px;color:var(--orange-2);text-align:right;white-space:nowrap}
 .rank{width:44px;height:44px;display:grid;place-items:center;font-weight:800;border-radius:50%;background:var(--bg-2);color:var(--violet-2)}
-.rank.top{background:var(--orange);color:#1a0b06}
+.rank.r1{background:var(--or);color:#1a0b06}
+.rank.r2{background:var(--argent);color:#1a0b06}
+.rank.r3{background:var(--bronze);color:#1a0b06}
 .vrow{grid-template-columns:1fr auto}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--surface-2);color:var(--fg);border:1px solid var(--line);padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);opacity:0;transition:opacity .25s,transform .25s;z-index:100;max-width:calc(100% - 32px);font-weight:700;font-size:14px;pointer-events:none;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--surface-2);color:var(--fg);border:1px solid var(--line);padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);opacity:0;transition:opacity .25s,transform .25s;z-index:100;max-width:calc(100% - 32px);font-weight:700;font-size:14px;pointer-events:none;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
@@ -213,7 +245,7 @@ dialog h2{font-family:var(--font-display);font-weight:400;font-size:28px;margin:
   <header class="hero">
     <p class="eyebrow">Halloween · 31 octobre 2026 · Anniversaire d’Amaury et Aya</p>
     <h1>Concours de costumes</h1>
-    <p class="prize">Le gagnant remporte un cocktail offert, à son choix.</p>
+    <p class="prize">Les trois meilleurs costumes remportent un cocktail offert, à leur choix.</p>
     <div class="hero-actions">
       <button id="btnInscription" class="btn btn-primary" type="button">Ajouter mon costume</button>
       <p id="maFicheInfo" class="mine-info" hidden></p>
@@ -222,8 +254,8 @@ dialog h2{font-family:var(--font-display);font-weight:400;font-size:28px;margin:
 
   <section id="gagnant" class="gagnant" hidden aria-live="polite">
     <p class="eyebrow">Les votes sont clos</p>
-    <h2 id="gagnantTitre">Le costume gagnant</h2>
-    <div id="gagnantList" class="gagnant-list"></div>
+    <h2 id="gagnantTitre">Le podium</h2>
+    <div id="gagnantList" class="podium"></div>
     <p id="gagnantCocktail" class="cocktail"></p>
   </section>
 
@@ -350,6 +382,28 @@ dialog h2{font-family:var(--font-display);font-weight:400;font-size:28px;margin:
   </div>
 </dialog>
 
+<div id="webs" class="webs" aria-hidden="true"></div>
+<div id="thread" class="thread" aria-hidden="true"></div>
+<div id="spider" class="spider" aria-hidden="true">
+  <svg viewBox="0 0 64 64">
+    <g class="legs legs-a" stroke="#d9cdef" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M27 24 L15 12 L7 16"/><path d="M27 31 L13 37 L5 41"/>
+      <path d="M37 27 L51 22 L59 26"/><path d="M37 34 L49 46 L55 56"/>
+    </g>
+    <g class="legs legs-b" stroke="#d9cdef" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M27 27 L13 22 L5 26"/><path d="M27 34 L15 46 L9 56"/>
+      <path d="M37 24 L49 12 L57 16"/><path d="M37 31 L51 37 L59 41"/>
+    </g>
+    <ellipse cx="32" cy="39" rx="9" ry="12" fill="#14091f" stroke="#b9a8d4" stroke-width="1.2"/>
+    <circle cx="32" cy="24" r="6.5" fill="#14091f" stroke="#b9a8d4" stroke-width="1.2"/>
+    <circle cx="29.5" cy="22" r="1.4" fill="#ff7a1a"/><circle cx="34.5" cy="22" r="1.4" fill="#ff7a1a"/>
+    <path d="M28 36 q4 -3 8 0 M28 42 q4 -3 8 0" fill="none" stroke="#6a4d9a" stroke-width="1"/>
+  </svg>
+</div>
+<button id="btnSon" class="son" type="button" aria-pressed="false" aria-label="Hurlements du loup-garou">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <span>Loup-garou</span>
+</button>
 <div id="toast" class="toast" role="status"></div>
 
 <script type="module">
@@ -500,24 +554,29 @@ function voteCounts(){
   return counts;
 }
 
+function rangLabel(r){ return r === 1 ? "1er" : `${r}e`; }
+let closVu = null;
 function renderGagnant(){
-  if (!state.etat.clos) { gagnant.hidden = true; return; }
+  if (!state.etat.clos) { gagnant.hidden = true; if (state.loaded.etat) closVu = false; return; }
   gagnant.hidden = false;
-  const gs = state.etat.gagnants.map(g => ({ ...g, f: state.fichesById.get(g.ficheId) })).filter(g => g.f);
-  gagnantTitre.textContent = gs.length > 1 ? "Les costumes gagnants, ex æquo" : (gs.length === 1 ? "Le costume gagnant" : "Aucun gagnant");
+  const gs = state.etat.gagnants.map(g => ({ ...g, f: state.fichesById.get(g.ficheId) })).filter(g => g.f).sort((a, b) => (a.rang || 9) - (b.rang || 9));
+  gagnantTitre.textContent = gs.length ? "Le podium" : "Aucun gagnant";
   gagnantList.replaceChildren(...gs.map(g => {
-    const item = document.createElement("div"); item.className = "gagnant-item";
+    const rang = g.rang || 1;
+    const exaequo = gs.filter(x => (x.rang || 1) === rang).length > 1;
+    const item = document.createElement("div"); item.className = `podium-item r${Math.min(rang, 3)}`;
+    const medal = document.createElement("div"); medal.className = "medal"; medal.textContent = rangLabel(rang);
     const img = document.createElement("img"); img.src = g.f.photo || ""; img.alt = g.f.personnage || "";
     const txt = document.createElement("div");
     const b = document.createElement("b"); b.textContent = g.f.personnage || "";
     const who = document.createElement("span"); who.textContent = (g.f.type === "duo" ? "Duo : " : "") + porteursText(g.f);
-    const n = document.createElement("span"); n.textContent = plural(g.votes || 0, "vote");
-    txt.append(b, who, n); item.append(img, txt);
+    const n = document.createElement("span"); n.textContent = plural(g.votes || 0, "vote") + (exaequo ? " · ex æquo" : "");
+    txt.append(b, who, n); item.append(medal, img, txt);
     return item;
   }));
-  if (gs.length === 0) gagnantCocktail.textContent = "Aucun vote n’a été enregistré.";
-  else if (gs.length === 1) gagnantCocktail.textContent = gs[0].f.type === "duo" ? "Un cocktail offert pour le duo, à votre choix." : "Un cocktail offert, à ton choix.";
-  else gagnantCocktail.textContent = "Un cocktail offert pour chaque fiche gagnante, à leur choix.";
+  gagnantCocktail.textContent = gs.length === 0 ? "Aucun vote n’a été enregistré." : "Un cocktail offert pour chaque fiche du podium, à son choix. Pour un duo, le cocktail vaut pour le duo.";
+  if (closVu === false && gs.length) hurlementReveal();
+  closVu = true;
 }
 
 const cardEls = new Map();
@@ -904,10 +963,16 @@ async function toggleClos(){
       return;
     }
     const counts = voteCounts();
-    let max = 0; for (const n of counts.values()) max = Math.max(max, n);
-    const gagnants = max > 0 ? state.fiches.filter(f => (counts.get(f.id) || 0) === max).map(f => ({ ficheId: f.id, votes: max })) : [];
+    const ranked = state.fiches.map(f => ({ ficheId: f.id, votes: counts.get(f.id) || 0, createdAtMs: f.createdAtMs || 0 }))
+      .filter(x => x.votes > 0).sort((a, b) => b.votes - a.votes || a.createdAtMs - b.createdAtMs);
+    const gagnants = [];
+    for (const x of ranked) {
+      const rang = 1 + ranked.filter(y => y.votes > x.votes).length;
+      if (rang > 3) break;
+      gagnants.push({ ficheId: x.ficheId, votes: x.votes, rang });
+    }
     await setDoc(doc(db, "concours", "etat"), { clos: true, gagnants, closedAtMs: Date.now(), closedAt: serverTimestamp() });
-    toast(gagnants.length ? "Votes clos. Le gagnant est affiché à tous les invités." : "Votes clos. Aucun vote enregistré.");
+    toast(gagnants.length ? "Votes clos. Le podium est affiché à tous les invités." : "Votes clos. Aucun vote enregistré.");
   } catch (err) { toast(dbErrorText(err)); }
 }
 async function resetAll(){
@@ -963,10 +1028,10 @@ function renderAdmin(){
   if (state.adminTab === "classement") {
     const ordered = [...state.fiches].sort((a, b) => (counts.get(b.id) || 0) - (counts.get(a.id) || 0) || (a.createdAtMs || 0) - (b.createdAtMs || 0));
     if (!ordered.length) { const p = document.createElement("p"); p.className = "msg"; p.textContent = "Aucune fiche."; c.append(p); }
-    let max = 0; for (const n of counts.values()) max = Math.max(max, n);
     ordered.forEach((f, i) => {
       const n = counts.get(f.id) || 0;
-      const rank = document.createElement("div"); rank.className = "rank" + (n > 0 && n === max ? " top" : ""); rank.textContent = String(i + 1);
+      const rang = 1 + ordered.filter(o => (counts.get(o.id) || 0) > n).length;
+      const rank = document.createElement("div"); rank.className = "rank" + (n > 0 && rang <= 3 ? ` r${rang}` : ""); rank.textContent = String(i + 1);
       const cnt = document.createElement("div"); cnt.className = "count"; cnt.textContent = String(n);
       c.append(rowEl(f, rank, cnt));
     });
@@ -988,6 +1053,152 @@ function renderAdmin(){
       c.append(row);
     });
   }
+}
+
+// ---------- Décor : toiles d’araignée dans les coins ----------
+(function webs(){
+  const host = $("webs"); if (!host) return;
+  function webPath(){
+    const n = 7, rings = 6, R = 100;
+    const A = []; for (let i = 0; i < n; i++) { const a = (i / (n - 1)) * Math.PI / 2; A.push(i === 0 || i === n - 1 ? a : a + (Math.random() - .5) * .12); }
+    const len = A.map(() => R * (0.9 + Math.random() * 0.12));
+    const f = v => v.toFixed(1);
+    let d = "";
+    A.forEach((a, i) => { d += `M0 0L${f(Math.cos(a) * len[i])} ${f(Math.sin(a) * len[i])}`; });
+    for (let k = 1; k <= rings; k++) {
+      const r = R * (0.12 + 0.76 * Math.pow(k / rings, 1.2));
+      for (let i = 0; i < n - 1; i++) {
+        const a1 = A[i], a2 = A[i + 1], am = (a1 + a2) / 2, sag = r * 0.86;
+        d += `M${f(Math.cos(a1) * r)} ${f(Math.sin(a1) * r)}Q${f(Math.cos(am) * sag)} ${f(Math.sin(am) * sag)} ${f(Math.cos(a2) * r)} ${f(Math.sin(a2) * r)}`;
+      }
+    }
+    return d;
+  }
+  for (const pos of ["tl", "tr", "bl", "br"]) {
+    const w = document.createElement("div"); w.className = "web " + pos;
+    w.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="${webPath()}" fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linecap="round"/></svg>`;
+    host.appendChild(w);
+  }
+})();
+
+// ---------- Décor : araignée qui se balade ----------
+(function spider(){
+  const el = $("spider"), thread = $("thread"); if (!el || !thread) return;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const half = 17;
+  let W = innerWidth, H = innerHeight;
+  let x = W * 0.78, y = -half, ang = Math.PI / 2;
+  let mode = "drop", tx = x, ty = Math.min(170, H * 0.25), speed = 60, pauseUntil = 0, last = 0, raf = 0;
+  const place = () => { el.style.transform = `translate(${x - half}px, ${y - half}px) rotate(${ang + Math.PI / 2}rad)`; };
+  const legs = on => el.classList.toggle("walking", on);
+  function pickTarget(){
+    const m = 28;
+    tx = m + Math.random() * Math.max(1, W - 2 * m); ty = m + Math.random() * Math.max(1, H - 2 * m);
+    speed = Math.random() < 0.15 ? 180 : 40 + Math.random() * 60;
+  }
+  if (reduce) { x = W - 44; y = 64; thread.style.left = x + "px"; thread.style.height = (y - half) + "px"; place(); return; }
+  function step(ts){
+    raf = requestAnimationFrame(step);
+    const dt = last ? Math.min(0.05, (ts - last) / 1000) : 0; last = ts;
+    if (mode === "drop") {
+      y += 85 * dt; thread.style.left = x + "px"; thread.style.height = Math.max(0, y - half) + "px"; place();
+      if (y >= ty) { mode = "walk"; thread.classList.add("fade"); setTimeout(() => { thread.hidden = true; }, 1300); pauseUntil = ts + 900; ang = -Math.PI / 2; pickTarget(); }
+      return;
+    }
+    if (ts < pauseUntil) { legs(false); return; }
+    const dx = tx - x, dy = ty - y, dist = Math.hypot(dx, dy);
+    if (dist < 4) { legs(false); pauseUntil = ts + 600 + Math.random() * 3500; pickTarget(); return; }
+    let d = Math.atan2(dy, dx) - ang; d = Math.atan2(Math.sin(d), Math.cos(d));
+    ang += d * Math.min(1, dt * 6);
+    x += Math.cos(ang) * speed * dt; y += Math.sin(ang) * speed * dt;
+    x = Math.max(half, Math.min(W - half, x)); y = Math.max(half, Math.min(H - half, y));
+    legs(true); place();
+  }
+  const start = () => { if (!raf) { last = 0; raf = requestAnimationFrame(step); } };
+  const stop = () => { cancelAnimationFrame(raf); raf = 0; legs(false); };
+  addEventListener("resize", () => { W = innerWidth; H = innerHeight; x = Math.min(x, W - half); y = Math.min(y, H - half); if (mode === "walk") pickTarget(); });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) stop(); else start(); });
+  place(); start();
+})();
+
+// ---------- Son : hurlement de loup-garou (synthèse Web Audio, aucun fichier) ----------
+let actx = null, master = null;
+const activeNodes = new Set();
+function ensureAudio(){
+  if (actx) return actx;
+  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+  actx = new AC();
+  const comp = actx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 4; comp.connect(actx.destination);
+  master = actx.createGain(); master.gain.value = 0.8;
+  const dry = actx.createGain(); dry.gain.value = 0.75; master.connect(dry).connect(comp);
+  const sr = actx.sampleRate, len = Math.floor(sr * 2.6), ir = actx.createBuffer(2, len, sr);
+  for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.8) * 0.5; }
+  const conv = actx.createConvolver(); conv.buffer = ir;
+  const wet = actx.createGain(); wet.gain.value = 0.45; master.connect(conv).connect(wet).connect(comp);
+  return actx;
+}
+function track(n){ activeNodes.add(n); n.onended = () => activeNodes.delete(n); return n; }
+function voice(ctx, t0, base, dur, vol){
+  const out = ctx.createGain();
+  out.gain.setValueAtTime(0.0001, t0); out.gain.exponentialRampToValueAtTime(vol, t0 + 0.4);
+  out.gain.setValueAtTime(vol, t0 + dur * 0.6); out.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.Q.value = 0.9;
+  lp.frequency.setValueAtTime(700, t0); lp.frequency.linearRampToValueAtTime(1500, t0 + 0.8); lp.frequency.linearRampToValueAtTime(600, t0 + dur);
+  lp.connect(out); out.connect(master);
+  const sum = ctx.createGain(); sum.connect(lp);
+  const src = ctx.createGain(); src.gain.value = 0.35;
+  const f1 = ctx.createBiquadFilter(); f1.type = "bandpass"; f1.Q.value = 4; f1.frequency.setValueAtTime(700, t0); f1.frequency.linearRampToValueAtTime(400, t0 + 1.1);
+  const f2 = ctx.createBiquadFilter(); f2.type = "bandpass"; f2.Q.value = 5; f2.frequency.setValueAtTime(1150, t0); f2.frequency.linearRampToValueAtTime(820, t0 + 1.1);
+  const g1 = ctx.createGain(); g1.gain.value = 1.4; const g2 = ctx.createGain(); g2.gain.value = 0.8; const g0 = ctx.createGain(); g0.gain.value = 0.25;
+  src.connect(f1).connect(g1).connect(sum); src.connect(f2).connect(g2).connect(sum); src.connect(g0).connect(sum);
+  const peak = base * 2.1, top = peak * 1.19;
+  const vib = ctx.createOscillator(); vib.frequency.setValueAtTime(4.5, t0); vib.frequency.linearRampToValueAtTime(5.8, t0 + dur);
+  const vibG = ctx.createGain(); vibG.gain.setValueAtTime(0, t0); vibG.gain.linearRampToValueAtTime(peak * 0.03, t0 + 1.2); vib.connect(vibG);
+  for (const det of [-7, 7]) {
+    const o = ctx.createOscillator(); o.type = "sawtooth"; o.detune.value = det;
+    o.frequency.setValueAtTime(base, t0);
+    o.frequency.exponentialRampToValueAtTime(peak, t0 + 0.75);
+    o.frequency.setValueAtTime(peak, t0 + dur * 0.38);
+    o.frequency.exponentialRampToValueAtTime(top, t0 + dur * 0.38 + 0.25);
+    o.frequency.setValueAtTime(top, t0 + dur * 0.62);
+    o.frequency.exponentialRampToValueAtTime(peak * 0.68, t0 + dur);
+    vibG.connect(o.frequency); o.connect(src); o.start(t0); o.stop(t0 + dur + 0.05); track(o);
+  }
+  vib.start(t0); vib.stop(t0 + dur + 0.05); track(vib);
+  const nb = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const nd = nb.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+  const noise = ctx.createBufferSource(); noise.buffer = nb; noise.loop = true;
+  const nf = ctx.createBiquadFilter(); nf.type = "bandpass"; nf.frequency.value = 1400; nf.Q.value = 0.7;
+  const ng = ctx.createGain(); ng.gain.setValueAtTime(0.0001, t0); ng.gain.exponentialRampToValueAtTime(vol * 0.12, t0 + 0.3); ng.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  noise.connect(nf).connect(ng).connect(master); noise.start(t0); noise.stop(t0 + dur + 0.05); track(noise);
+}
+function howl({ pack = false } = {}){
+  const ctx = ensureAudio(); if (!ctx) return false;
+  if (ctx.state === "suspended") ctx.resume();
+  const t0 = ctx.currentTime + 0.05, base = 175 + Math.random() * 40;
+  voice(ctx, t0, base, 3.8 + Math.random() * 0.8, 0.55);
+  if (pack) { voice(ctx, t0 + 1.3 + Math.random() * 0.6, base * 0.75, 3.4, 0.3); if (Math.random() < 0.5) voice(ctx, t0 + 2.4, base * 1.12, 3.0, 0.22); }
+  return true;
+}
+function stopHowls(){ for (const n of activeNodes) { try { n.stop(); } catch {} } activeNodes.clear(); }
+const btnSon = $("btnSon");
+let sonOn = LS.get("hw_son") === "1", sonTimer = 0, sonActif = false;
+btnSon.setAttribute("aria-pressed", String(sonOn));
+function programmerHurlement(){
+  clearTimeout(sonTimer); if (!sonOn) return;
+  sonTimer = setTimeout(() => { if (sonOn && sonActif && !document.hidden) howl({ pack: Math.random() < 0.5 }); programmerHurlement(); }, 40000 + Math.random() * 50000);
+}
+function demarrerSon(){
+  if (!howl({ pack: true })) { toast("Le son n’est pas disponible sur ce navigateur."); sonOn = false; btnSon.setAttribute("aria-pressed", "false"); return; }
+  sonActif = true; programmerHurlement();
+}
+function hurlementReveal(){ if (sonOn && sonActif) howl({ pack: true }); }
+btnSon.addEventListener("click", () => {
+  sonOn = !sonOn; LS.set("hw_son", sonOn ? "1" : "0"); btnSon.setAttribute("aria-pressed", String(sonOn));
+  if (sonOn) demarrerSon(); else { clearTimeout(sonTimer); stopHowls(); }
+});
+if (sonOn) {
+  const unlock = () => { removeEventListener("pointerup", unlock); removeEventListener("keydown", unlock); if (sonOn && !sonActif) demarrerSon(); };
+  addEventListener("pointerup", unlock); addEventListener("keydown", unlock);
 }
 </script>
 </body>
