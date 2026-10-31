@@ -7,6 +7,7 @@
 <meta name="color-scheme" content="dark">
 <meta name="robots" content="noindex">
 <title>Concours de costumes</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%83%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Pirata+One&display=swap" rel="stylesheet">
@@ -64,6 +65,20 @@ p{margin:0}
 .btn-danger.armed{background:var(--danger);color:#fff}
 .btn-secondary.armed{background:var(--violet);color:#fff}
 .btn-sm{padding:8px 12px;font-size:13px}
+
+/* Compte à rebours */
+.compte{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 12px 12px;margin:0 0 14px;text-align:center}
+.compte .eyebrow{margin-bottom:2px}
+.chrono{display:flex;justify-content:center;align-items:flex-start;gap:2px;margin:6px 0 4px}
+.unit{display:inline-grid;justify-items:center}
+.unit b{font-family:var(--font-display);font-weight:400;font-size:clamp(44px,13vw,68px);line-height:1;color:var(--orange-2);min-width:1.3em;text-align:center;font-variant-numeric:tabular-nums}
+.unit small{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:6px}
+.chrono i{font-style:normal;font-family:var(--font-display);font-size:clamp(36px,10vw,54px);line-height:1;color:var(--violet-2);padding-top:4px}
+.compte-note{color:var(--muted);font-size:13px;margin-top:6px}
+.compte.urgent .unit b{color:var(--orange);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.deadline-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.deadline-row .input{padding:9px 12px}
 
 /* Podium */
 .gagnant{background:linear-gradient(135deg,rgba(255,122,26,.18),rgba(143,91,255,.18));border:1px solid rgba(255,177,92,.45);border-radius:18px;padding:18px 16px;margin:0 0 14px}
@@ -252,6 +267,16 @@ dialog h2{font-family:var(--font-display);font-weight:400;font-size:28px;margin:
     </div>
   </header>
 
+  <section id="compte" class="compte" aria-label="Compte à rebours avant l’annonce du podium">
+    <p class="eyebrow">Annonce des trois lauréats dans</p>
+    <p class="chrono" id="chrono">
+      <span class="unit"><b id="cH">--</b><small>heures</small></span><i>:</i>
+      <span class="unit"><b id="cM">--</b><small>minutes</small></span><i>:</i>
+      <span class="unit"><b id="cS">--</b><small>secondes</small></span>
+    </p>
+    <p class="compte-note" id="compteNote">À minuit, les votes sont clos et le podium s’affiche ici.</p>
+  </section>
+
   <section id="gagnant" class="gagnant" hidden aria-live="polite">
     <p class="eyebrow">Les votes sont clos</p>
     <h2 id="gagnantTitre">Le podium</h2>
@@ -369,8 +394,16 @@ dialog h2{font-family:var(--font-display);font-weight:400;font-size:28px;margin:
     <div id="adminPanel" class="dlg-fields" hidden>
       <p id="adminStats" class="msg"></p>
       <div class="admin-bar">
-        <button id="btnCloturer" class="btn btn-secondary btn-sm" type="button">Clôturer les votes</button>
+        <button id="btnCloturer" class="btn btn-secondary btn-sm" type="button">Clôturer les votes maintenant</button>
         <button id="btnReset" class="btn btn-danger btn-sm" type="button">Tout réinitialiser</button>
+      </div>
+      <div class="field">
+        <label for="heureFin">Fin des votes et annonce du podium à</label>
+        <div class="deadline-row">
+          <input id="heureFin" class="input" type="time" step="60">
+          <button id="btnHeureFin" class="btn btn-secondary btn-sm" type="button">Modifier l’heure</button>
+        </div>
+        <p id="heureFinNote" class="msg"></p>
       </div>
       <div class="tabs" role="tablist">
         <button class="tab active" type="button" data-tab="classement">Classement</button>
@@ -421,6 +454,7 @@ const firebaseConfig = {
 const ADMIN_HASH = "a0d0c660c3bfa6a17976c248d998590e0ade873345cab0c65401829c452aa363";
 const PAGE_SIZE = 6;
 const MAX_FICHES = 55;
+const DEADLINE_DEFAULT_MS = Date.UTC(2026, 9, 31, 23, 0, 0); // minuit, heure de Paris (UTC+1 après le passage à l’heure d’hiver)
 const MAX_PHOTO_BYTES = 230 * 1024;
 
 const $ = (id) => document.getElementById(id);
@@ -437,6 +471,9 @@ function parseJSON(s, fallback){ try { const v = JSON.parse(s); return v == null
 function uuid(){ try { return crypto.randomUUID(); } catch { return "d-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10); } }
 function plural(n, s, p){ return `${n} ${n > 1 ? (p || s + "s") : s}`; }
 const fmtTime = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+const fmtHeure = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" });
+const fmtJourHeure = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+function heureTexte(ms){ const h = fmtHeure.format(new Date(ms)); return h === "00:00" ? "minuit" : h; }
 function when(d){
   const t = d.createdAt && typeof d.createdAt.toDate === "function" ? d.createdAt.toDate() : (d.createdAtMs ? new Date(d.createdAtMs) : null);
   return t ? fmtTime.format(t) : "…";
@@ -451,13 +488,16 @@ const state = {
   prefere: LS.get("hw_prefere") || null,
   fiches: [], fichesById: new Map(),
   votes: [],
-  etat: { clos: false, gagnants: [] },
+  etat: { clos: false, gagnants: [], deadlineMs: null },
   monVote: null,
   flipped: new Set(),
   page: 0,
   loaded: { fiches: false, votes: false, etat: false, first: false },
+  cache: { fiches: true, votes: true },
   adminTab: "classement"
 };
+function deadlineMs(){ return state.etat.deadlineMs || DEADLINE_DEFAULT_MS; }
+function estClos(){ return !!state.etat.clos || Date.now() >= deadlineMs(); }
 if (!Array.isArray(state.mesFiches)) state.mesFiches = [];
 if (!Array.isArray(state.favoris)) state.favoris = [];
 function persistFav(){ LS.set("hw_favoris", JSON.stringify(state.favoris)); if (state.prefere) LS.set("hw_prefere", state.prefere); else LS.del("hw_prefere"); }
@@ -505,7 +545,7 @@ const loadTimer = setTimeout(() => {
 onSnapshot(query(collection(db, "fiches"), orderBy("createdAtMs", "asc")), snap => {
   state.fiches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   state.fichesById = new Map(state.fiches.map(f => [f.id, f]));
-  state.loaded.fiches = true;
+  state.loaded.fiches = true; state.cache.fiches = snap.metadata.fromCache;
   clearTimeout(loadTimer);
   const mesAvant = state.mesFiches.length;
   state.mesFiches = state.mesFiches.filter(id => state.fichesById.has(id));
@@ -520,17 +560,66 @@ onSnapshot(query(collection(db, "fiches"), orderBy("createdAtMs", "asc")), snap 
 
 onSnapshot(collection(db, "votes"), snap => {
   state.votes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  state.loaded.votes = true;
+  state.loaded.votes = true; state.cache.votes = snap.metadata.fromCache;
   state.monVote = state.votes.find(v => v.id === state.deviceId) || null;
   renderAll();
 }, err => { console.error(err); });
 
 onSnapshot(doc(db, "concours", "etat"), snap => {
   const d = snap.exists() ? snap.data() : {};
-  state.etat = { clos: !!d.clos, gagnants: Array.isArray(d.gagnants) ? d.gagnants : [], closedAtMs: d.closedAtMs || null };
+  state.etat = { clos: !!d.clos, gagnants: Array.isArray(d.gagnants) ? d.gagnants : [], closedAtMs: d.closedAtMs || null, deadlineMs: typeof d.deadlineMs === "number" ? d.deadlineMs : null };
   state.loaded.etat = true;
+  planifierClotureAuto();
+  tick();
   renderAll();
 }, err => { console.error(err); });
+
+// ---------- Compte à rebours et clôture automatique ----------
+const compte = $("compte"), compteNote = $("compteNote"), cH = $("cH"), cM = $("cM"), cS = $("cS");
+let chronoClos = null, autoCloseTimer = 0;
+function tick(){
+  const clos = estClos();
+  compte.hidden = clos;
+  if (!clos) {
+    const s = Math.max(0, Math.floor((deadlineMs() - Date.now()) / 1000));
+    cH.textContent = String(Math.floor(s / 3600)).padStart(2, "0");
+    cM.textContent = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+    cS.textContent = String(s % 60).padStart(2, "0");
+    compte.classList.toggle("urgent", s <= 60);
+    compteNote.textContent = `À ${heureTexte(deadlineMs())}, les votes sont clos et le podium s’affiche ici.`;
+  }
+  if (chronoClos !== null && chronoClos !== clos) renderAll();
+  chronoClos = clos;
+}
+setInterval(tick, 500);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
+tick();
+function computePodium(){
+  const counts = voteCounts();
+  const ranked = state.fiches.map(f => ({ ficheId: f.id, votes: counts.get(f.id) || 0, createdAtMs: f.createdAtMs || 0 }))
+    .filter(x => x.votes > 0).sort((a, b) => b.votes - a.votes || a.createdAtMs - b.createdAtMs);
+  const out = [];
+  for (const x of ranked) {
+    const rang = 1 + ranked.filter(y => y.votes > x.votes).length;
+    if (rang > 3) break;
+    out.push({ ficheId: x.ficheId, votes: x.votes, rang });
+  }
+  return out;
+}
+function planifierClotureAuto(){
+  clearTimeout(autoCloseTimer);
+  if (state.etat.clos) return;
+  const delay = Math.max(0, deadlineMs() - Date.now()) + 800 + Math.random() * 4000;
+  if (delay > 2000000000) return;
+  autoCloseTimer = setTimeout(cloturerAuto, delay);
+}
+async function cloturerAuto(){
+  if (state.etat.clos || Date.now() < deadlineMs()) return;
+  if (!state.loaded.fiches || !state.loaded.votes || state.cache.fiches || state.cache.votes) { autoCloseTimer = setTimeout(cloturerAuto, 5000); return; }
+  try {
+    await setDoc(doc(db, "concours", "etat"), { clos: true, gagnants: computePodium(), closedAtMs: Date.now(), closedAt: serverTimestamp(), auto: true }, { merge: true });
+  } catch (err) { console.warn("Clôture automatique non enregistrée :", err); }
+}
 
 // ---------- Rendu ----------
 function renderAll(){ renderHero(); renderGagnant(); renderGalerie(); renderFavoris(); renderStats(); renderAdmin(); }
@@ -544,8 +633,8 @@ function renderHero(){
     maFicheInfo.hidden = true;
   }
   const complet = state.loaded.fiches && state.fiches.length >= MAX_FICHES;
-  btnInscription.disabled = state.etat.clos || complet;
-  btnInscription.textContent = state.etat.clos ? "Inscriptions closes" : (complet ? `Complet (${MAX_FICHES} fiches)` : (mine.length ? "Ajouter un autre costume" : "Ajouter mon costume"));
+  btnInscription.disabled = estClos() || complet;
+  btnInscription.textContent = estClos() ? "Inscriptions closes" : (complet ? `Complet (${MAX_FICHES} fiches)` : (mine.length ? "Ajouter un autre costume" : "Ajouter mon costume"));
 }
 
 function voteCounts(){
@@ -557,9 +646,11 @@ function voteCounts(){
 function rangLabel(r){ return r === 1 ? "1er" : `${r}e`; }
 let closVu = null;
 function renderGagnant(){
-  if (!state.etat.clos) { gagnant.hidden = true; if (state.loaded.etat) closVu = false; return; }
+  if (!estClos()) { gagnant.hidden = true; if (state.loaded.etat) closVu = false; return; }
   gagnant.hidden = false;
-  const gs = state.etat.gagnants.map(g => ({ ...g, f: state.fichesById.get(g.ficheId) })).filter(g => g.f).sort((a, b) => (a.rang || 9) - (b.rang || 9));
+  if (!state.loaded.fiches || !state.loaded.votes) { gagnantTitre.textContent = "Calcul du podium…"; gagnantList.replaceChildren(); gagnantCocktail.textContent = ""; return; }
+  const source = state.etat.clos ? state.etat.gagnants : computePodium();
+  const gs = source.map(g => ({ ...g, f: state.fichesById.get(g.ficheId) })).filter(g => g.f).sort((a, b) => (a.rang || 9) - (b.rang || 9));
   gagnantTitre.textContent = gs.length ? "Le podium" : "Aucun gagnant";
   gagnantList.replaceChildren(...gs.map(g => {
     const rang = g.rang || 1;
@@ -624,7 +715,7 @@ function updateCard(card, f){
   porteurs.append(f.p1 || "");
   if (f.type === "duo") { const s = document.createElement("small"); s.textContent = "et"; porteurs.append(s, f.p2 || ""); }
   const mine = state.mesFiches.includes(f.id);
-  const canVote = !mine && !state.monVote && !state.etat.clos;
+  const canVote = !mine && !state.monVote && !estClos();
   const heart = card.querySelector(".heart"), tag = card.querySelector(".mine-tag");
   heart.hidden = !canVote; tag.hidden = !mine;
   const liked = state.favoris.includes(f.id);
@@ -705,7 +796,7 @@ function toggleFavori(id){
   if (!f) return;
   if (state.mesFiches.includes(id)) { toast("Tu ne peux pas voter pour ta propre fiche."); return; }
   if (state.monVote) { toast("Ton vote est déjà enregistré."); return; }
-  if (state.etat.clos) { toast("Les votes sont clos."); return; }
+  if (estClos()) { toast("Les votes sont clos."); return; }
   const i = state.favoris.indexOf(id);
   if (i >= 0) { state.favoris.splice(i, 1); if (state.prefere === id) state.prefere = null; }
   else state.favoris.push(id);
@@ -750,7 +841,7 @@ function renderFavoris(){
   voteDone.hidden = true; favList.hidden = false;
   favCount.textContent = plural(favs.length, "coup de cœur", "coups de cœur");
   favList.replaceChildren(...favs.map(favItem));
-  if (state.etat.clos) { voteForm.hidden = true; voteClos.hidden = false; }
+  if (estClos()) { voteForm.hidden = true; voteClos.hidden = false; }
   else { voteForm.hidden = false; voteClos.hidden = true; updateVoteBtn(); }
 }
 function updateVoteBtn(){
@@ -763,7 +854,8 @@ if (LS.get("hw_votant")) votantNom.value = LS.get("hw_votant");
 
 let voting = false;
 async function voter(){
-  if (voting || !state.prefere || state.monVote || state.etat.clos) return;
+  if (voting || !state.prefere || state.monVote) return;
+  if (estClos()) { toast("Les votes sont clos."); renderAll(); return; }
   const f = state.fichesById.get(state.prefere); if (!f) return;
   const nom = votantNom.value.trim();
   if (!nom) { votantNom.focus(); return; }
@@ -803,7 +895,7 @@ aide.addEventListener("toggle", () => LS.set("hw_aide", aide.open ? "ouvert" : "
 
 // ---------- Inscription ----------
 let photoDataUrl = null, compressing = false, pendingRef = null;
-btnInscription.addEventListener("click", () => { if (!state.etat.clos && state.fiches.length < MAX_FICHES) dlgInscription.showModal(); });
+btnInscription.addEventListener("click", () => { if (!estClos() && state.fiches.length < MAX_FICHES) dlgInscription.showModal(); });
 
 const typeRadios = formInscription.querySelectorAll('input[name="type"]');
 typeRadios.forEach(r => r.addEventListener("change", () => {
@@ -892,7 +984,7 @@ formInscription.addEventListener("submit", async e => {
   if (!perso) return showErr(duo ? "Indique le nom du duo ou des personnages." : "Indique le nom du personnage ou du costume.");
   if (compressing) return showErr("La photo est encore en préparation, patiente une seconde.");
   if (!photoDataUrl) return showErr(duo ? "Ajoute une photo commune du duo." : "Ajoute une photo du costume.");
-  if (state.etat.clos) return showErr("Les inscriptions sont closes.");
+  if (estClos()) return showErr("Les inscriptions sont closes.");
   if (state.fiches.length >= MAX_FICHES && !(pendingRef && state.fichesById.has(pendingRef.id))) return showErr(`Le concours est complet : ${MAX_FICHES} fiches au maximum.`);
   btnEnregistrer.disabled = true; btnEnregistrer.textContent = "Enregistrement…";
   try {
@@ -952,26 +1044,37 @@ function armed(btn, label, fn){
   btn.dataset.label = btn.textContent; btn.dataset.armed = "1"; btn.classList.add("armed"); btn.textContent = label;
   setTimeout(() => { if (btn.dataset.armed === "1") { btn.dataset.armed = ""; btn.classList.remove("armed"); btn.textContent = btn.dataset.label; } }, 4000);
 }
-btnCloturer.addEventListener("click", () => armed(btnCloturer, state.etat.clos ? "Confirmer la réouverture" : "Confirmer la clôture", toggleClos));
+btnCloturer.addEventListener("click", () => armed(btnCloturer, estClos() ? "Confirmer la réouverture" : "Confirmer la clôture", toggleClos));
 btnReset.addEventListener("click", () => armed(btnReset, "Confirmer : tout effacer", resetAll));
+
+const heureFin = $("heureFin"), heureFinNote = $("heureFinNote");
+function hhmm(ms){ const d = new Date(ms); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; }
+function prochaineOccurrence(value){
+  const [h, m] = value.split(":").map(Number);
+  const d = new Date(); d.setHours(h, m, 0, 0);
+  if (d.getTime() <= Date.now() + 30000) d.setDate(d.getDate() + 1);
+  return d.getTime();
+}
+$("btnHeureFin").addEventListener("click", async () => {
+  if (!heureFin.value) { toast("Choisis une heure."); return; }
+  const ms = prochaineOccurrence(heureFin.value);
+  try {
+    await setDoc(doc(db, "concours", "etat"), { deadlineMs: ms, clos: false, gagnants: [], updatedAtMs: Date.now() }, { merge: true });
+    toast(`Fin des votes fixée à ${heureTexte(ms)} (${fmtJourHeure.format(new Date(ms))}).`);
+  } catch (err) { toast(dbErrorText(err)); }
+});
 
 async function toggleClos(){
   try {
-    if (state.etat.clos) {
-      await setDoc(doc(db, "concours", "etat"), { clos: false, gagnants: [], updatedAtMs: Date.now() });
-      toast("Votes rouverts.");
+    if (estClos()) {
+      const depasse = Date.now() >= deadlineMs();
+      const nouvelle = depasse ? Date.now() + 30 * 60000 : deadlineMs();
+      await setDoc(doc(db, "concours", "etat"), { clos: false, gagnants: [], deadlineMs: nouvelle, updatedAtMs: Date.now() }, { merge: true });
+      toast(`Votes rouverts jusqu’à ${heureTexte(nouvelle)}.`);
       return;
     }
-    const counts = voteCounts();
-    const ranked = state.fiches.map(f => ({ ficheId: f.id, votes: counts.get(f.id) || 0, createdAtMs: f.createdAtMs || 0 }))
-      .filter(x => x.votes > 0).sort((a, b) => b.votes - a.votes || a.createdAtMs - b.createdAtMs);
-    const gagnants = [];
-    for (const x of ranked) {
-      const rang = 1 + ranked.filter(y => y.votes > x.votes).length;
-      if (rang > 3) break;
-      gagnants.push({ ficheId: x.ficheId, votes: x.votes, rang });
-    }
-    await setDoc(doc(db, "concours", "etat"), { clos: true, gagnants, closedAtMs: Date.now(), closedAt: serverTimestamp() });
+    const gagnants = computePodium();
+    await setDoc(doc(db, "concours", "etat"), { clos: true, gagnants, closedAtMs: Date.now(), closedAt: serverTimestamp(), auto: false }, { merge: true });
     toast(gagnants.length ? "Votes clos. Le podium est affiché à tous les invités." : "Votes clos. Aucun vote enregistré.");
   } catch (err) { toast(dbErrorText(err)); }
 }
@@ -984,7 +1087,7 @@ async function resetAll(){
       refs.slice(i, i + 400).forEach(r => b.delete(r));
       await b.commit();
     }
-    await setDoc(doc(db, "concours", "etat"), { clos: false, gagnants: [], updatedAtMs: Date.now() });
+    await setDoc(doc(db, "concours", "etat"), { clos: false, gagnants: [], updatedAtMs: Date.now() }, { merge: true });
     state.favoris = []; state.prefere = null; persistFav();
     state.mesFiches = []; LS.set("hw_mesFiches", "[]");
     toast("Tout a été réinitialisé.");
@@ -1022,8 +1125,10 @@ function delBtn(label, armLabel, fn){
 function renderAdmin(){
   if (!dlgAdmin.open || adminPanel.hidden) return;
   const counts = voteCounts();
-  adminStats.textContent = `${plural(state.fiches.length, "fiche")} · ${plural(state.votes.length, "vote")} · ` + (state.etat.clos ? "votes clos" : "votes ouverts");
-  if (btnCloturer.dataset.armed !== "1") btnCloturer.textContent = state.etat.clos ? "Rouvrir les votes" : "Clôturer les votes";
+  adminStats.textContent = `${plural(state.fiches.length, "fiche")} · ${plural(state.votes.length, "vote")} · ` + (estClos() ? "votes clos" : "votes ouverts");
+  if (btnCloturer.dataset.armed !== "1") btnCloturer.textContent = estClos() ? "Rouvrir les votes" : "Clôturer les votes maintenant";
+  if (document.activeElement !== heureFin) heureFin.value = hhmm(deadlineMs());
+  heureFinNote.textContent = (state.etat.clos ? "Votes clos manuellement. " : (Date.now() >= deadlineMs() ? "Heure dépassée, votes clos automatiquement. " : "")) + `Fin prévue : ${fmtJourHeure.format(new Date(deadlineMs()))}.`;
   const c = adminContent; c.replaceChildren();
   if (state.adminTab === "classement") {
     const ordered = [...state.fiches].sort((a, b) => (counts.get(b.id) || 0) - (counts.get(a.id) || 0) || (a.createdAtMs || 0) - (b.createdAtMs || 0));
